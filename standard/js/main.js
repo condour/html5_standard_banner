@@ -89,10 +89,13 @@ function addListeners(){
 		clickThrough();
 	});
 
-	$(".CTA").hover(
+	$(".CTA").on("mouseover",
 		function(){
 			TweenLite.to($(".CTABG"), .3, {scale:1.1, ease:Quad.easeInOut });
-		}, function(){
+		}
+	);
+	$(".CTA").on("mouseout",
+		function(){
 			TweenLite.to($(".CTABG"), .3, {scale:1, ease:Quad.easeInOut });
 		}
 	);
@@ -102,10 +105,13 @@ function addListeners(){
 		replay();
 	});
 
-	$(".replayBtn").hover(
+	$(".replayBtn").on("mouseover",
 		function(){
-			TweenLite.to($(".replayBtn"), 0.5, {rotation:-360, overwrite:true});
-		}, function(){
+			TweenLite.to($(".replayBtn"), 0.5, {rotation:-360, transformOrigin:"50% 57%",overwrite:true});
+		}
+	)
+	$(".replayBtn").on("mouseout",
+		function(){
 			TweenLite.set($(".replayBtn"), {rotation:0, overwrite:true});
 		}
 	);

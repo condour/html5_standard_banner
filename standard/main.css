@@ -19,7 +19,7 @@ html, body, div, span, p, a, del, em, img, ol, ul, li, fieldset, form, label {
 	height: 250px;
 }
 
-.absPos{
+.sprite {
 	position: absolute;
 }
 
@@ -58,7 +58,7 @@ html, body, div, span, p, a, del, em, img, ol, ul, li, fieldset, form, label {
 }
 
 .mainImage{
-	background-image:url(images/mainImage.jpg);
+	background-image:url(assets/mainImage.jpg);
 	z-index: 40;
 }
 
@@ -76,7 +76,7 @@ html, body, div, span, p, a, del, em, img, ol, ul, li, fieldset, form, label {
 	left: 13px;
 	width: 70px;
 	height: 9px;
-	background-image:url(images/CTACopy.png);
+	background-image:url(assets/CTACopy.png);
 	z-index: 20;
 }
 
@@ -95,7 +95,7 @@ html, body, div, span, p, a, del, em, img, ol, ul, li, fieldset, form, label {
 	left: 8px;
 	width: 13px;
 	height: 15px;
-	background-image:url(images/replayButton.svg);
+	background-image:url(assets/replayButton.svg);
 	cursor: pointer;
 	z-index: 500;
 }
