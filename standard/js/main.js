@@ -2,6 +2,9 @@
 var BANNER_WIDTH=300;
 var BANNER_HEIGHT=250;
 
+//This is used to report timing
+var stopWatch;
+
 //This gets called when the ad is finished loading
 function mainInit(){
 	addListeners();
@@ -16,6 +19,8 @@ function seq01(){
 	console.log("seq01");
 
 	var twnDelay=3;
+
+	stopWatch=new Date().getTime(); 
 
 	TweenLite.to($(".mainImage"), 1, {alpha:0, delay:twnDelay});
 
@@ -42,6 +47,9 @@ function seq02(){
 	twnDelay+=.4;
 	TweenLite.from($(".replayBtn"), .4, {scale:0, ease:Back.easeOut, delay:twnDelay});
 	$(".replayBtn").show();
+
+	twnDelay+=.4;
+	TweenLite.delayedCall(twnDelay, returnTimer);
 }
 
 //Set the initial states of all divs here
@@ -115,4 +123,10 @@ function addListeners(){
 			TweenLite.set($(".replayBtn"), {rotation:0, overwrite:true});
 		}
 	);
+}
+
+//This will echo how many seconds have passed
+function returnTimer(){
+	stopWatch=((new Date().getTime())-stopWatch)*.001;
+	console.log(stopWatch+" seconds");
 }
