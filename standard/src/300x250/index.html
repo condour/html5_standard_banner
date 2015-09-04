@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Test 300x250</title>
+    <meta name="ad.size" content="width=300,height=250">
+    <style>
+	
+	body {
+		margin:0px; padding:0px;
+	}
+	* { Box-sizing: Border-box }
+	</style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/latest/plugins/CSSPlugin.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/latest/easing/EasePack.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/latest/TweenLite.min.js"></script>
+    <script type="text/javascript" src="main.js"></script>
+
+    <!-- DCM CLICKTAG -->
+    <script>
+    var clickTag = "http://www.google.com"
+    </script>
+
+</head>
+
+<body>
+    <div class="container">
+        <a href="javascript:window.open(window.clickTag)" target=”_blank”>
+            <div class="below-click-tag" style="position:absolute; width:300px; height:250px; border: 1px solid #ccc">
+                <!-- most elements within the banner go here. -->
+            </div>
+        </a>
+        <a href="javascript:window.open(window.clickTag)" target=”_blank”>
+            <div class="cta-container">
+                <!-- cta goes here -->
+            </div>
+        </a>
+        <div class="above-click-tag">
+            
+        </div>
+    </div>
+</body>
+<script type="text/javascript">
+window.onload = function() {
+    var banner = createBanner();
+    banner.start();
+}
+</script>
+
+</html>
