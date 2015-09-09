@@ -1,9 +1,10 @@
-function createBanner(utils,assets) {
+function createBanner(u,a) { // u is utils, a is assets
 	"use strict";
 
     // onetime setup 
     // create a variable to track banner time.
     var initialTime = new Date().getTime();
+    var tl = new TimelineLite();
     // declare all necessary dom objects
     var container,
     	image0, 
@@ -22,7 +23,7 @@ function createBanner(utils,assets) {
         belowClickTag;
 
     // extract dimension sizes from metatag in markup
-    utils.dimensions = utils.extractSize(document.querySelectorAll("[name='ad.size']")[0].getAttributeNode("content").value);
+    u.dimensions = u.extractSize(document.querySelectorAll("[name='ad.size']")[0].getAttributeNode("content").value);
     
     // retrieve main layers from markup
     container = document.querySelectorAll('.container')[0];
@@ -35,22 +36,22 @@ function createBanner(utils,assets) {
 
     function render() {
       
-      	container.style.width = utils.dimensions.width + "px";
-      	container.style.height = utils.dimensions.height + "px";
-        image0 = utils.generateSprite(assets.image0jpg); // note that because this image is base64 in the file, we reference it by variable
-        image1 = utils.generateSprite('image1.jpg');
-        resolveImage = utils.generateSprite('resolveImage.jpg');
+      	TweenLite.set(container,{width:u.dimensions.width,height:u.dimensions.height})
+        image0 = u.generateSprite(a.image0jpg); // note that because this image is base64 in the file, we reference it by variable
+        image1 = u.generateSprite('image1.jpg');
+        resolveImage = u.generateSprite('resolveImage.jpg');
 
-        copy0 = utils.generateSprite('copy0-fs8.png');
-        copy1 = utils.generateSprite('copy1-fs8.png');
-        resolveCopy0 = utils.generateSprite('resolveCopy0-fs8.png');
-        resolveCopy1 = utils.generateSprite('resolveCopy1-fs8.png');
-        replayButton = utils.generateSizedSprite('replayButton.svg',utils.dimensions.width-20,5,15,15);
+        copy0 = u.generateSprite('copy0-fs8.png');
+        copy1 = u.generateSprite('copy1-fs8.png');
+        resolveCopy0 = u.generateSprite('resolveCopy0-fs8.png');
+        resolveCopy1 = u.generateSprite('resolveCopy1-fs8.png');
+        replayButton = u.generateSizedSprite('replayButton.svg',u.dimensions.width-20,5,15,15);
+
+
         // REPLAY SETUP
 
         
-        utils.clone(replayButton.style,{
-        	
+        u.clone(replayButton.style,{
         	cursor: 'pointer',
         })
 
@@ -58,12 +59,11 @@ function createBanner(utils,assets) {
         // CTA SETUP
 
 
-        ctaRolledOut = utils.generateSizedSprite('ctaRolledOut-fs8.png',0,0,116,28);
-        ctaRolledOver = utils.generateSizedSprite('ctaRolledOver-fs8.png',0,0,116,28); 
+        ctaRolledOut = u.generateSizedSprite('ctaRolledOut-fs8.png',0,0,116,28);
+        ctaRolledOver = u.generateSizedSprite('ctaRolledOver-fs8.png',0,0,116,28); 
 
-        cta = utils.generateContainer(); // create a sized container for the cta
-        utils.clone(cta.style, {
-
+        cta = u.generateContainer(); // create a sized container for the cta
+        u.clone(cta.style, {
             left: "15px",
             top: "173px",
             width: '116px',
@@ -78,17 +78,16 @@ function createBanner(utils,assets) {
 
         // ----------------------------------------------------
 
-        // Set up 
-
-        utils.clone(belowClickTag.style, {
-            width: utils.dimensions.width + 'px',
-            height: utils.dimensions.height + 'px',
+        u.clone(belowClickTag.style, {
+            width: u.dimensions.width + 'px',
+            height: u.dimensions.height + 'px',
             overflow: "hidden",
             position: "absolute"
         });
-        utils.appendChildrenTo(belowClickTag)(image0, copy0, image1, copy1, resolveImage,resolveCopy0,resolveCopy1);
 
-        utils.hide(image1, copy1, aboveClickTag, cta, resolveImage, resolveCopy0, resolveCopy1, ctaRolledOver);
+        u.appendChildrenTo(belowClickTag)(image0, copy0, image1, copy1, resolveImage,resolveCopy0,resolveCopy1);
+        u.appendChildrenTo(aboveClickTag)(replayButton);
+        u.hide( ctaRolledOver);
 
         addListeners();
         
@@ -98,96 +97,63 @@ function createBanner(utils,assets) {
 
     //The first function in our sequence of animations
 
-    function seq01() {
+    function animate() {
 
         var twnDelay = 0; // running tally of the animation
         var tt = .75; // short for transition time
+        var lastPlusSmall = "-="+(tt*.9);
+        tl.set(replayButton,{display:"none"})
+            .from(image0, tt, {
+                opacity: 0,
+                ease: Expo.easeOut
+            }, "seq01")
+            .from(copy0, tt, {
+                x: -u.dimensions.width,
+                ease: Expo.easeOut,
 
-        TweenLite.from(image0, tt, {
-            opacity: 0,
-            ease: Expo.easeOut 
-        });
-        TweenLite.from(copy0, tt, {
-            x:-utils.dimensions.width,
-            ease: Expo.easeOut,
-            delay:twnDelay += .2
-        });
-       TweenLite.delayedCall(twnDelay + 2, seq02);
+            }, "+=.2")
 
-    }
+        //.add("seq02", "+=2")
 
-    function seq02() {
-        var twnDelay = 0;
-        var tt = .75;
-        
-		utils.show(image1,copy1);
+        .to(copy0, tt, {
+                x: u.dimensions.width,
+                ease: Expo.easeIn
+            }, "+=2")
+            .from(image1, tt, {
+                opacity: 0,
+                ease: Expo.easeOut
+            })
+            .from(copy1, tt, {
+                x: -u.dimensions.width,
+                ease: Expo.easeOut
+            }, "-=.5")
 
-        TweenLite.to(copy0, tt, {
-            x: utils.dimensions.width,
-            ease: Expo.easeIn,
-            delay:twnDelay
-        });
-        twnDelay += tt;         
+       // .add("doResolve", "+=2")
 
-		TweenLite.from(image1,tt,{
-        	opacity:0,
-        	ease:Expo.easeOut,
-        	delay:twnDelay
-        });
-        TweenLite.from(copy1, tt, {
-            x: -utils.dimensions.width,
-            ease: Expo.easeOut,
-            delay:twnDelay += .2
-        });
-         TweenLite.delayedCall(twnDelay + 2, doResolve);
-    }
+        .to(copy1, tt, {
+                x: u.dimensions.width,
+                ease: Expo.easeIn
+            }, "+=2")
+            .from(resolveImage, tt, {
+                opacity: 0,
+                ease: Expo.easeOut,
+            })
+            .set(replayButton,{
+                display: "block"
+            })
+            .staggerFrom([resolveCopy0, resolveCopy1], tt, {
+                x: -u.dimensions.width,
+                ease: Expo.easeOut,
+            }, .1)
+            .staggerFrom([cta, replayButton], tt, {
+                opacity: 0,
+                ease: Expo.easeOut,
+            }, .1, lastPlusSmall);
 
-
-    function doResolve() {
-
-        var twnDelay = 0;
-        utils.appendChildrenTo(aboveClickTag)( replayButton);
-        utils.show(resolveCopy0, resolveCopy1, resolveImage, cta, aboveClickTag);
-        var tt = .75;
-        TweenLite.to(copy1, tt, {
-            x: utils.dimensions.width,
-            ease: Expo.easeIn
-        });
-
-        twnDelay += tt;
-        
-		TweenLite.from(resolveImage, tt, {
-            opacity: 0,
-            delay: twnDelay += .1,
-            ease: Expo.easeOut,
-        });
-
-        TweenLite.from(resolveCopy0, tt, {
-            
-            x: -utils.dimensions.width,
-            delay: twnDelay += .1,
-            ease: Expo.easeOut,
-        });
-
-        TweenLite.from(resolveCopy1, tt, {
-            
-            x: -utils.dimensions.width,
-            delay: twnDelay += .1,
-            ease: Expo.easeOut,
-        });
-
-        TweenLite.from(cta, tt, {
-            opacity: 0,
-            delay: twnDelay += .1,
-            ease: Expo.easeOut,
-        });
-        TweenLite.from(replayButton, tt, {
-            opacity: 0,
-            delay: twnDelay += .1,
-            ease: Expo.easeOut
-        })
+           // tl.seek("doResolve");
 
     }
+
 
     function doCtaRollover() {
 
@@ -223,14 +189,7 @@ function createBanner(utils,assets) {
     //Replay the ad
     function replay() {
 
-        
-        utils.removeAllChildren(aboveClickTag);
-        utils.removeAllChildren(belowClickTag);
-        utils.removeAllChildren(ctaContainer);
-        removeListeners();
-        
-        render();
-        seq01();
+        tl.restart();
 
     }
 
@@ -240,13 +199,6 @@ function createBanner(utils,assets) {
 
     */
 
-    function removeListeners() {
-        cta.removeEventListener('mouseout', doCtaRollout);
-        cta.removeEventListener('mouseover', doCtaRollover);
-        replayButton.removeEventListener('mouseover', doReplayRollover);
-        replayButton.removeEventListener('click', replay);
-    }
-
     function addListeners() {
         cta.addEventListener('mouseout', doCtaRollout);
         cta.addEventListener('mouseover', doCtaRollover);
@@ -254,12 +206,10 @@ function createBanner(utils,assets) {
         replayButton.addEventListener('click', replay);
     }
 
-
-
     return {
         start: function() {
             render();
-            seq01();
+            animate();
         }
     }
 

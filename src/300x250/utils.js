@@ -18,16 +18,22 @@
     }
   }
 }());
+
+// Utils object (by convention, referred to as u within banner);
+
 var createUtils = function(){
    'use strict';
     var my = {}; 
+
+
+
     my.removeAllChildren = function(el) {
         while (el.firstChild) {
             el.removeChild(el.firstChild);
         }
     }
     //This will echo how many seconds have passed
-    my.returnTimer = function() {
+    my.returnTimer = function(initialTime) {
         var stopWatch = ((new Date().getTime()) - initialTime) * .001;
     }
 
