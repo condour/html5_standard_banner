@@ -1,6 +1,5 @@
 function createBanner(u,a) { // u is utils, a is assets
 	"use strict";
-
     // onetime setup 
     // create a variable to track banner time.
     var initialTime = new Date().getTime();
@@ -41,20 +40,18 @@ function createBanner(u,a) { // u is utils, a is assets
         image1 = u.generateSprite('image1.jpg');
         resolveImage = u.generateSprite('resolveImage.jpg');
 
-        copy0 = u.generateSprite('copy0-fs8.png');
-        copy1 = u.generateSprite('copy1-fs8.png');
-        resolveCopy0 = u.generateSprite('resolveCopy0-fs8.png');
-        resolveCopy1 = u.generateSprite('resolveCopy1-fs8.png');
+        copy0 = u.generateSprite(a.copy0png);
+        copy1 = u.generateSprite(a.copy1png);
+        resolveCopy0 = u.generateSprite(a.resolveCopy0png);
+        resolveCopy1 = u.generateSprite(a.resolveCopy1png);
         replayButton = u.generateSizedSprite('replayButton.svg',u.dimensions.width-20,5,15,15);
 
 
         // REPLAY SETUP
-
         
         u.clone(replayButton.style,{
         	cursor: 'pointer',
         })
-
 
         // CTA SETUP
 
@@ -111,7 +108,7 @@ function createBanner(u,a) { // u is utils, a is assets
                 x: -u.dimensions.width,
                 ease: Expo.easeOut,
 
-            }, "+=.2")
+            }, "+=.65")
 
         //.add("seq02", "+=2")
 
@@ -144,7 +141,7 @@ function createBanner(u,a) { // u is utils, a is assets
             .staggerFrom([resolveCopy0, resolveCopy1], tt, {
                 x: -u.dimensions.width,
                 ease: Expo.easeOut,
-            }, .1)
+            }, .1, lastPlusSmall)
             .staggerFrom([cta, replayButton], tt, {
                 opacity: 0,
                 ease: Expo.easeOut,
@@ -153,7 +150,6 @@ function createBanner(u,a) { // u is utils, a is assets
            // tl.seek("doResolve");
 
     }
-
 
     function doCtaRollover() {
 
@@ -185,7 +181,6 @@ function createBanner(u,a) { // u is utils, a is assets
         })
     }
 
-
     //Replay the ad
     function replay() {
 
@@ -194,9 +189,7 @@ function createBanner(u,a) { // u is utils, a is assets
     }
 
     /*
-
         //This is where we add any rollovers or clicks    
-
     */
 
     function addListeners() {
@@ -212,7 +205,5 @@ function createBanner(u,a) { // u is utils, a is assets
             animate();
         }
     }
-
-
 
 }
