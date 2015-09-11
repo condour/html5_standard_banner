@@ -84,7 +84,7 @@ function gulp64() {
       var cleanExt = parsed.ext.substr(1).toLowerCase();
       var isSvg = cleanExt === 'svg';
       var encoding = isSvg ? 'utf8' : 'base64';
-      var stringifiedFile = isSvg ? file.contents : file.contents.toString(encoding);
+      var stringifiedFile = isSvg ? encodeURI(file.contents) : file.contents.toString(encoding);
       var prefix = 'data:image/' + fileTypes[cleanExt] + ';' + encoding + ',';
       var lineString = parsed.name + cleanExt + ':\'' + prefix + file.contents.toString(encoding) + '\',';
       var lineBuffer = new Buffer(lineString,'ascii');

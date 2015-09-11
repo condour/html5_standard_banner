@@ -9,10 +9,13 @@ function createBanner(u,a) { // u is utils, a is assets
     	image0, 
     	image1, 
     	resolveImage,
-    	copy0, 
-    	copy1, 
+    	copy0a,
+        copy0b,
+    	copy1a, 
     	resolveCopy0, 
     	resolveCopy1,
+        resolveCopy2,
+        resolveCopy3,
     	replayButton,
 		cta,
     	ctaRolledOut,
@@ -37,14 +40,18 @@ function createBanner(u,a) { // u is utils, a is assets
       
       	TweenLite.set(container,{width:u.dimensions.width,height:u.dimensions.height})
         image0 = u.generateSprite(a.image0jpg); // note that because this image is base64 in the file, we reference it by variable
-        image1 = u.generateSprite('image1.jpg');
-        resolveImage = u.generateSprite('resolveImage.jpg');
-console.log("about to generate for copy0svg");
-        copy0 = u.generateSprite(a.copy0svg);
+        image1 = u.generateSprite(a.image1jpg);
+        resolveImage = u.generateSprite(a.resolveImagejpg);
 
-        copy1 = u.generateSprite(a.copy1png);
+        copy0a = u.generateSprite(a.copy0apng);
+        copy0b = u.generateSprite(a.copy0bpng);
+        copy1a = u.generateSprite(a.copy1apng);
+
         resolveCopy0 = u.generateSprite(a.resolveCopy0png);
         resolveCopy1 = u.generateSprite(a.resolveCopy1png);
+        resolveCopy2 = u.generateSprite(a.resolveCopy2png);
+        resolveCopy3 = u.generateSprite(a.resolveCopy3png);
+        
         replayButton = u.generateSizedSprite(a.replayButtonsvg,u.dimensions.width-20,5,15,15);
 
 
@@ -57,8 +64,8 @@ console.log("about to generate for copy0svg");
         // CTA SETUP
 
 
-        ctaRolledOut = u.generateSizedSprite('ctaRolledOut-fs8.png',0,0,116,28);
-        ctaRolledOver = u.generateSizedSprite('ctaRolledOver-fs8.png',0,0,116,28); 
+        ctaRolledOut = u.generateSizedSprite(a.ctaRolledOutpng,0,0,116,28);
+        ctaRolledOver = u.generateSizedSprite(a.ctaRolledOverpng,0,0,116,28); 
 
         cta = u.generateContainer(); // create a sized container for the cta
         u.clone(cta.style, {
@@ -83,7 +90,7 @@ console.log("about to generate for copy0svg");
             position: "absolute"
         });
 
-        u.appendChildrenTo(belowClickTag)(image0, copy0, image1, copy1, resolveImage,resolveCopy0,resolveCopy1);
+        u.appendChildrenTo(belowClickTag)(image0, copy0a, copy0b, image1, copy1a, resolveImage, resolveCopy0, resolveCopy1, resolveCopy2, resolveCopy3);
         u.appendChildrenTo(aboveClickTag)(replayButton);
         u.hide( ctaRolledOver);
 
@@ -105,44 +112,48 @@ console.log("about to generate for copy0svg");
                 opacity: 0,
                 ease: Expo.easeOut
             }, "seq01")
-            .from(copy0, tt, {
+            .staggerFrom([copy0a,copy0b], tt, {
                 x: -u.dimensions.width,
                 ease: Expo.easeOut,
 
-            }, "+=.65")
+            }, .1, "-=.65")
 
         //.add("seq02", "+=2")
 
-        .to(copy0, tt, {
+        .staggerTo([copy0b,copy0a], tt, {
                 x: u.dimensions.width,
                 ease: Expo.easeIn
-            }, "+=2")
+            }, .1, "+=2")
             .from(image1, tt, {
                 opacity: 0,
                 ease: Expo.easeOut
             })
-            .from(copy1, tt, {
+            .from(copy1a, tt, {
                 x: -u.dimensions.width,
                 ease: Expo.easeOut
             }, "-=.5")
 
        // .add("doResolve", "+=2")
 
-        .to(copy1, tt, {
+        .to(copy1a, tt, {
                 x: u.dimensions.width,
                 ease: Expo.easeIn
             }, "+=2")
-            .from(resolveImage, tt, {
-                opacity: 0,
-                ease: Expo.easeOut,
-            })
+           
             .set(replayButton,{
                 display: "block"
             })
-            .staggerFrom([resolveCopy0, resolveCopy1], tt, {
+            .from(resolveImage, tt, {
+                opacity: 0,
+                ease: Expo.easeOut
+            })
+            .staggerFrom([resolveCopy0, resolveCopy1,resolveCopy2], tt, {
                 x: -u.dimensions.width,
                 ease: Expo.easeOut,
-            }, .1, lastPlusSmall)
+            }, .1, lastPlusSmall)            
+            .from(resolveCopy3,tt,{
+                opacity:0
+            })
             .staggerFrom([cta, replayButton], tt, {
                 opacity: 0,
                 ease: Expo.easeOut,
