@@ -68,7 +68,7 @@ var createUtils = function(){
     my.generateSizedSprite = function(imgURL,x,y,w,h){
       var div = this.generateSizedContainer(w+1,h+1);
         div.style.backgroundRepeat = 'no-repeat';
-        var urlString = "url('" + imgURL + "')"
+        var urlString = "url(\"" + imgURL + "\")"
         console.log(urlString);
         div.style.backgroundImage = urlString;
         div.style.backgroundSize = w + 'px ' + h + 'px';

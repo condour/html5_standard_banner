@@ -41,7 +41,7 @@ function createBanner(u,a) { // u is utils, a is assets
       	TweenLite.set(container,{width:u.dimensions.width,height:u.dimensions.height})
         image0 = u.generateSprite(a.image0jpg); // note that because this image is base64 in the file, we reference it by variable
         image1 = u.generateSprite(a.image1jpg);
-        resolveImage = u.generateSprite(a.resolveImagejpg);
+        resolveImage = u.generateSprite(a.resolveImagepng);
 
         copy0a = u.generateSprite(a.copy0apng);
         copy0b = u.generateSprite(a.copy0bpng);
@@ -118,34 +118,41 @@ function createBanner(u,a) { // u is utils, a is assets
 
             }, .1, "-=.65")
 
-        //.add("seq02", "+=2")
+        .add("seq02","+=2")
 
         .staggerTo([copy0b,copy0a], tt, {
                 x: u.dimensions.width,
                 ease: Expo.easeIn
-            }, .1, "+=2")
+            }, .1, "seq02")
             .from(image1, tt, {
                 opacity: 0,
                 ease: Expo.easeOut
+            })
+            .set(image0,{
+                opacity:0
             })
             .from(copy1a, tt, {
                 x: -u.dimensions.width,
                 ease: Expo.easeOut
             }, "-=.5")
 
-       // .add("doResolve", "+=2")
+        .add("doResolve", "+=2")
 
         .to(copy1a, tt, {
                 x: u.dimensions.width,
                 ease: Expo.easeIn
-            }, "+=2")
-           
-            .set(replayButton,{
-                display: "block"
-            })
-            .from(resolveImage, tt, {
+            }, "doResolve")
+           .to(image1, tt, {
                 opacity: 0,
                 ease: Expo.easeOut
+            })
+
+            .from(resolveImage, tt, {
+                x: u.dimensions.width,
+                ease: Expo.easeOut
+            },lastPlusSmall)
+            .set(replayButton,{
+                display: "block"
             })
             .staggerFrom([resolveCopy0, resolveCopy1,resolveCopy2], tt, {
                 x: -u.dimensions.width,
