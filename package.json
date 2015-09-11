@@ -12,6 +12,7 @@
     "fs": "^0.0.2",
     "gulp": "^3.9.0",
     "gulp-concat": "^2.6.0",
+    "gulp-svgmin": "^1.2.0",
     "gutil": "^1.6.4",
     "imagemin-pngquant": "^4.2.0",
     "inherits": "^2.0.1",

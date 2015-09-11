@@ -15,8 +15,14 @@ var through = require('through2');
 var concat = require('gulp-concat');
 var gutil = require('gutil');
 var streamqueue = require('streamqueue');
+var svgmin = require('gulp-svgmin');
 // iterate through each folder within assets
-
+var fileTypes = {
+	jpg: 'jpeg',
+	png: 'png',
+	gif: 'gif',
+	svg: 'svg+xml'
+}
 function getFolders(dir) {
     return fs.readdirSync(dir)
       .filter(function(file) {
@@ -47,14 +53,17 @@ gulp.task('default',function(){
 	sourceFolders.map(function(folder){
 		streamqueue({objectMode: true}, 
 			gulp.src('./header.js'),
-			gulp.src(path.join(assetsPath, folder, '/*.png'))
+			gulp.src(path.join(assetsPath, folder, '/*.{png,gif,jpg}'))
 				.pipe(imageminPngquant({quality: '65-80', speed: 4})())
+				.pipe(gulp64())
+				.pipe(concat('assetList')),
+			gulp.src(path.join(assetsPath,folder,'/*.svg'))
+				.pipe(svgmin())
 				.pipe(gulp64())
 				.pipe(concat('assetList')),
 			gulp.src('./footer.js')
 		)
-		
-		.pipe(concat('assetList.js')).pipe(gulp.dest(path.join(sourcePath,folder)));
+		.pipe(concat('assets.js')).pipe(gulp.dest(path.join(sourcePath,folder)));
 	})
 
 });
@@ -72,8 +81,12 @@ function gulp64() {
     if (file.isBuffer()) {
 
       var parsed = path.parse(file.history[0]);
-      var pngPrefix = 'data:image/png;base64,'
-      var lineString = parsed.name + parsed.ext.substr(1) + ':"' + pngPrefix + file.contents.toString('base64') + '",';
+      var cleanExt = parsed.ext.substr(1).toLowerCase();
+      var isSvg = cleanExt === 'svg';
+      var encoding = isSvg ? 'utf8' : 'base64';
+      var stringifiedFile = isSvg ? file.contents : file.contents.toString(encoding);
+      var prefix = 'data:image/' + fileTypes[cleanExt] + ';' + encoding + ',';
+      var lineString = parsed.name + cleanExt + ':\'' + prefix + file.contents.toString(encoding) + '\',';
       var lineBuffer = new Buffer(lineString,'ascii');
       file.contents = lineBuffer;
       

@@ -39,12 +39,13 @@ function createBanner(u,a) { // u is utils, a is assets
         image0 = u.generateSprite(a.image0jpg); // note that because this image is base64 in the file, we reference it by variable
         image1 = u.generateSprite('image1.jpg');
         resolveImage = u.generateSprite('resolveImage.jpg');
+console.log("about to generate for copy0svg");
+        copy0 = u.generateSprite(a.copy0svg);
 
-        copy0 = u.generateSprite(a.copy0png);
         copy1 = u.generateSprite(a.copy1png);
         resolveCopy0 = u.generateSprite(a.resolveCopy0png);
         resolveCopy1 = u.generateSprite(a.resolveCopy1png);
-        replayButton = u.generateSizedSprite('replayButton.svg',u.dimensions.width-20,5,15,15);
+        replayButton = u.generateSizedSprite(a.replayButtonsvg,u.dimensions.width-20,5,15,15);
 
 
         // REPLAY SETUP
