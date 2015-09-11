@@ -7,11 +7,14 @@ var gulp = require('gulp');
 var fs = require('fs');
 var path = require('path');
 var merge = require('merge-stream');
+var es = require('event-stream')
 var imageminPngquant = require('imagemin-pngquant');
 var assetsPath = 'assets';
 var sourcePath = 'src';
 var through = require('through2');
 var concat = require('gulp-concat');
+var gutil = require('gutil');
+var streamqueue = require('streamqueue');
 // iterate through each folder within assets
 
 function getFolders(dir) {
@@ -28,16 +31,30 @@ function tryBase64(){
 	});
 }
 
+function string_src(filename, string) {
+  var src = require('stream').Readable({ objectMode: true })
+  src._read = function () {
+    this.push(new gutil.File({ cwd: "", base: "", path: filename, contents: new Buffer(string) }))
+    this.push(null)
+  }
+  return src
+}
+
 gulp.task('default',function(){
 
 	sourceFolders = getFolders(assetsPath);
 
 	sourceFolders.map(function(folder){
-		gulp.src(path.join(assetsPath, folder, '/*.png'))
-			.pipe(imageminPngquant({quality: '65-80', speed: 4})())
-			.pipe(gulp64())
-			.pipe(concat('assetList.js'))
-			.pipe(gulp.dest(path.join(sourcePath,folder))),
+		streamqueue({objectMode: true}, 
+			gulp.src('./header.js'),
+			gulp.src(path.join(assetsPath, folder, '/*.png'))
+				.pipe(imageminPngquant({quality: '65-80', speed: 4})())
+				.pipe(gulp64())
+				.pipe(concat('assetList')),
+			gulp.src('./footer.js')
+		)
+		
+		.pipe(concat('assetList.js')).pipe(gulp.dest(path.join(sourcePath,folder)));
 	})
 
 });
@@ -63,7 +80,6 @@ function gulp64() {
     }
     if (file.isStream()) {
     	 this.emit('error', new PluginError(PLUGIN_NAME, 'Streams are not supported!'));
-      //file.contents = file.contents.pipe(prefixStream(prefixText));
     }
     this.push(file);
     cb();
