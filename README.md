@@ -37,4 +37,6 @@ Spritesheeting can be labor intensive or complex if changes have to be made, so 
 
 #### Problem: Base 64 encoding, and pngquanting, and svg minifying, is tedious.
 
-#### Solution: gulp task automatically takes any assets in assets/<size> folders, URI encodes, minifies as necessary, dumping the results into assets.js. 
+#### Solution: There's a gulp task for that.
+
+Automatically takes any assets in assets/<size> folders, URI encodes, minifies as necessary, dumping the results into assets.js.
