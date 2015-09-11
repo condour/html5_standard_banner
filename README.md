@@ -28,7 +28,7 @@ There's extremely little overhead to a large area of transparency in a png, so w
 
 #### Solution: Make sure output is human-readable
 
-We're going to consider a fuller build process in the future, but the philosophy will remain that any developer can take the output and work directly with it, as many parties may be involved with the banners at different stages in the process (localization, external QA, traffickers). If we decide to adopt a build process, it will be strictly to automate process (base64 encoding images, pngquant, zipping, etc.) and not to minify or transpile. Minification is not great bang for the buck if gzip compression is present (see comparison of file sizes here: https://css-tricks.com/the-difference-between-minification-and-gzipping/)
+We're going to consider a fuller build process in the future, but the philosophy will remain that any developer can take the output and work directly with it, as many parties may be involved with the banners at different stages in the process (localization, external QA, traffickers). At the moment, instead of a full build process, we have an asset prep gulp task, but the deliverables remain in the same spot, so it's strictly optional. https://css-tricks.com/the-difference-between-minification-and-gzipping/)
 
 #### Problem: Strict file number and type limits among traffickers
 
