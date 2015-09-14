@@ -12,6 +12,7 @@
     "fs": "^0.0.2",
     "gulp": "^3.9.0",
     "gulp-concat": "^2.6.0",
+    "gulp-file": "^0.2.0",
     "gulp-svgmin": "^1.2.0",
     "gutil": "^1.6.4",
     "imagemin-pngquant": "^4.2.0",
@@ -21,7 +22,8 @@
     "path": "^0.11.14",
     "pngquant": "^0.5.0",
     "streamqueue": "^1.1.1",
-    "through2": "^2.0.0"
+    "through2": "^2.0.0",
+    "vinyl": "^0.5.3"
   },
   "devDependencies": {},
   "scripts": {

@@ -7,6 +7,7 @@ var gulp = require('gulp');
 var fs = require('fs');
 var path = require('path');
 var merge = require('merge-stream');
+var gfile = require('gulp-file');
 var es = require('event-stream')
 var imageminPngquant = require('imagemin-pngquant');
 var assetsPath = 'assets';
@@ -37,22 +38,15 @@ function tryBase64(){
 	});
 }
 
-function string_src(filename, string) {
-  var src = require('stream').Readable({ objectMode: true })
-  src._read = function () {
-    this.push(new gutil.File({ cwd: "", base: "", path: filename, contents: new Buffer(string) }))
-    this.push(null)
-  }
-  return src
-}
 
 gulp.task('default',function(){
+
 
 	sourceFolders = getFolders(assetsPath);
 
 	sourceFolders.map(function(folder){
 		streamqueue({objectMode: true}, 
-			gulp.src('./header.js'),
+			gfile('header', 'function createAssets() { return {', { src: true }),
 			gulp.src(path.join(assetsPath, folder, '/*.{png,gif,jpg}'))
 				.pipe(imageminPngquant({quality: '65-80', speed: 4})())
 				.pipe(gulp64())
@@ -61,7 +55,7 @@ gulp.task('default',function(){
 				.pipe(svgmin())
 				.pipe(gulp64())
 				.pipe(concat('assetList')),
-			gulp.src('./footer.js')
+			gfile('footer', '}}', { src: true })
 		)
 		.pipe(concat('assets.js')).pipe(gulp.dest(path.join(sourcePath,folder)));
 	})

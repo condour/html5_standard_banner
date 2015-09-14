@@ -1,32 +1,29 @@
-function createBanner(u,a) { // u is utils, a is assets
-	"use strict";
+function createBanner(u, a) { // u is utils, a is assets
+    "use strict";
     // onetime setup 
     // create a variable to track banner time.
     var initialTime = new Date().getTime();
     var tl = new TimelineLite();
     // declare all necessary dom objects
     var container,
-    	image0, 
-    	image1, 
-    	resolveImage,
-    	copy0a,
-        copy0b,
-    	copy1a, 
-    	resolveCopy0, 
-    	resolveCopy1,
-        resolveCopy2,
-        resolveCopy3,
-    	replayButton,
-		cta,
-    	ctaRolledOut,
-    	ctaRolledOver,
-        aboveClickTag, 
-        ctaContainer, 
+        image0,
+        image1,
+        resolveImage,
+        copy0,
+        copy1,
+        resolveCopy0,
+        resolveCopy1,
+        replayButton,
+        cta,
+        ctaRolledOut,
+        ctaRolledOver,
+        aboveClickTag,
+        ctaContainer,
         belowClickTag;
 
     // extract dimension sizes from metatag in markup
     u.dimensions = u.extractSize(document.querySelectorAll("[name='ad.size']")[0].getAttributeNode("content").value);
-    
+
     // retrieve main layers from markup
     container = document.querySelectorAll('.container')[0];
     aboveClickTag = document.querySelectorAll('.above-click-tag')[0]; // items that don't respond to clicktag
@@ -36,36 +33,44 @@ function createBanner(u,a) { // u is utils, a is assets
     // render, below, is the private function that creates the banner.
     // it also runs when the banner is replayed.
 
+
+   
+
     function render() {
-      
-      	TweenLite.set(container,{width:u.dimensions.width,height:u.dimensions.height})
+
+        TweenLite.set(container, {
+            width: u.dimensions.width,
+            height: u.dimensions.height
+        })
         image0 = u.generateSprite(a.image0jpg); // note that because this image is base64 in the file, we reference it by variable
         image1 = u.generateSprite(a.image1jpg);
+
+       
+        
         resolveImage = u.generateSprite(a.resolveImagepng);
 
-        copy0a = u.generateSprite(a.copy0apng);
-        copy0b = u.generateSprite(a.copy0bpng);
-        copy1a = u.generateSprite(a.copy1apng);
-
-        resolveCopy0 = u.generateSprite(a.resolveCopy0png);
-        resolveCopy1 = u.generateSprite(a.resolveCopy1png);
-        resolveCopy2 = u.generateSprite(a.resolveCopy2png);
-        resolveCopy3 = u.generateSprite(a.resolveCopy3png);
+        copy0 = u.generateSplitSprite(a.copy0png);
         
-        replayButton = u.generateSizedSprite(a.replayButtonsvg,u.dimensions.width-20,5,15,15);
+
+        copy1 = u.generateSplitSprite(a.copy1png);
+
+        resolveCopy0 = u.generateSplitSprite(a.resolveCopy0png);
+        resolveCopy1 = u.generateSplitSprite(a.resolveCopy1png);
+        
+        replayButton = u.generateSizedSprite(a.replayButtonsvg, u.dimensions.width - 20, 5, 15, 15);
 
 
         // REPLAY SETUP
-        
-        u.clone(replayButton.style,{
-        	cursor: 'pointer',
+
+        u.clone(replayButton.style, {
+            cursor: 'pointer',
         })
 
         // CTA SETUP
 
 
-        ctaRolledOut = u.generateSizedSprite(a.ctaRolledOutpng,0,0,116,28);
-        ctaRolledOver = u.generateSizedSprite(a.ctaRolledOverpng,0,0,116,28); 
+        ctaRolledOut = u.generateSizedSprite(a.ctaRolledOutpng, 0, 0, 116, 28);
+        ctaRolledOver = u.generateSizedSprite(a.ctaRolledOverpng, 0, 0, 116, 28);
 
         cta = u.generateContainer(); // create a sized container for the cta
         u.clone(cta.style, {
@@ -76,8 +81,8 @@ function createBanner(u,a) { // u is utils, a is assets
         });
         cta.appendChild(ctaRolledOut);
         cta.appendChild(ctaRolledOver);
-       
-        
+
+
         ctaRolledOver.style.transition = ctaRolledOver.style.WebkitTransition = "opacity .3s";
         ctaContainer.appendChild(cta);
 
@@ -90,12 +95,12 @@ function createBanner(u,a) { // u is utils, a is assets
             position: "absolute"
         });
 
-        u.appendChildrenTo(belowClickTag)(image0, copy0a, copy0b, image1, copy1a, resolveImage, resolveCopy0, resolveCopy1, resolveCopy2, resolveCopy3);
+        u.appendChildrenTo(belowClickTag)(image0, copy0, image1, copy1, resolveImage, resolveCopy0, resolveCopy1);
         u.appendChildrenTo(aboveClickTag)(replayButton);
-        u.hide( ctaRolledOver);
+        u.hide(ctaRolledOver);
 
         addListeners();
-        
+        u.subscribe("loaded",function(){container.style.display = 'block'});
 
     }
 
@@ -103,24 +108,26 @@ function createBanner(u,a) { // u is utils, a is assets
     //The first function in our sequence of animations
 
     function animate() {
-
+        container.style.display = 'block';
         var twnDelay = 0; // running tally of the animation
         var tt = .75; // short for transition time
-        var lastPlusSmall = "-="+(tt*.9);
-        tl.set(replayButton,{display:"none"})
+        var lastPlusSmall = "-=" + (tt * .9);
+        tl.set(replayButton, {
+                display: "none"
+            })
             .from(image0, tt, {
                 opacity: 0,
                 ease: Expo.easeOut
             }, "seq01")
-            .staggerFrom([copy0a,copy0b], tt, {
+            .staggerFrom(copy0.childNodes, tt, {
                 x: -u.dimensions.width,
                 ease: Expo.easeOut,
-
             }, .1, "-=.65")
+         
+            
+        .add("seq02", "+=2")
 
-        .add("seq02","+=2")
-
-        .staggerTo([copy0b,copy0a], tt, {
+        .staggerTo(copy0.childNodes, tt, {
                 x: u.dimensions.width,
                 ease: Expo.easeIn
             }, .1, "seq02")
@@ -128,45 +135,45 @@ function createBanner(u,a) { // u is utils, a is assets
                 opacity: 0,
                 ease: Expo.easeOut
             })
-            .set(image0,{
-                opacity:0
+            .set(image0, {
+                opacity: 0
             })
-            .from(copy1a, tt, {
+            .staggerFrom(copy1.childNodes, tt, {
                 x: -u.dimensions.width,
                 ease: Expo.easeOut
-            }, "-=.5")
+            }, .1, "-=.5")
 
         .add("doResolve", "+=2")
 
-        .to(copy1a, tt, {
+        .to(copy1, tt, {
                 x: u.dimensions.width,
                 ease: Expo.easeIn
             }, "doResolve")
-           .to(image1, tt, {
+            .to(image1, tt, {
                 opacity: 0,
                 ease: Expo.easeOut
             })
 
-            .from(resolveImage, tt, {
+        .from(resolveImage, tt, {
                 x: u.dimensions.width,
                 ease: Expo.easeOut
-            },lastPlusSmall)
-            .set(replayButton,{
+            }, lastPlusSmall)
+            .set(replayButton, {
                 display: "block"
             })
-            .staggerFrom([resolveCopy0, resolveCopy1,resolveCopy2], tt, {
+            .staggerFrom(resolveCopy0.childNodes, tt, {
                 x: -u.dimensions.width,
                 ease: Expo.easeOut,
-            }, .1, lastPlusSmall)            
-            .from(resolveCopy3,tt,{
-                opacity:0
+            }, .1, lastPlusSmall)
+            .from(resolveCopy1, tt, {
+                opacity: 0
             })
             .staggerFrom([cta, replayButton], tt, {
                 opacity: 0,
                 ease: Expo.easeOut,
             }, .1, lastPlusSmall);
 
-           // tl.seek("doResolve");
+       //  tl.seek("seq02");
 
     }
 
@@ -190,7 +197,7 @@ function createBanner(u,a) { // u is utils, a is assets
             rotation: -360,
             transformOrigin: "50% 54%",
             onComplete: resetReplay,
-            ease:Linear.easeNone
+            ease: Linear.easeNone
         });
     }
 
@@ -221,7 +228,7 @@ function createBanner(u,a) { // u is utils, a is assets
     return {
         start: function() {
             render();
-            animate();
+            
         }
     }
 
