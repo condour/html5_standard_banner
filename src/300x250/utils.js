@@ -173,71 +173,79 @@ var createUtils = function() {
             var imageX = 0,
                 imageY = 0;
             context.drawImage(imageObj, 0, 0);
-            var images = [];
+            
             
             var imageData = context.getImageData(imageX, imageY, imageWidth, imageHeight);
             var data = imageData.data;
             var inContent = false;
             var currentInd = 0;
-            images[currentInd] = [];
-            // iterate over all pixels based on x and y coordinates
+            var sections = [];
+            sections[currentInd] = {};
+            // iterate over all pixels based on x and y coordinates; find in and out points
             for (var y = 0; y < imageHeight; y++) {
                 // loop through each column
                 var blankLine = true;
 
                 for (var x = 0; x < imageWidth; x++) {
                     var prevLines = imageWidth * y;
-                    for (var b = 0; b < 4; b++) {
-                        images[currentInd].push(data[((imageWidth * y) + x) * 4 + b]);
-                    }
-
-                  
-                    if (data[((prevLines) + x) * 4 + 3] > 0) {
+                    var currentPixel = ((prevLines) + x) * 4;
+                   /* for (var b = 0; b < 4; b++) {
+                        images[currentInd].push(data[currentPixel + b]);
+                    }*/
+                    if (data[currentPixel + 3] > 0) {
                         blankLine = false;
+                        break;
                     }
 
                 }
                 if (!blankLine && !inContent) {
                     inContent = true;
-                    //console.log("now in content " + y)
+                    sections[currentInd].inpoint = y;
 
                 } else if (blankLine && inContent) {
                     inContent = false;
-                    scope.addArrayAsImage(images[currentInd], imageWidth, imageHeight, y, returnedContainer)
-                    var l = images[currentInd].length;
+
+                    sections[currentInd].outpoint = y;
                     currentInd++;
-                    images[currentInd] = new Array(l);
-                    //console.log("now not in content" + y);
+                    sections[currentInd] = {};
                 }
             }
-            scope.addArrayAsImage(images[currentInd], imageWidth, imageHeight, y, returnedContainer)
+
+            sections.forEach(function(result){
+                if(result.inpoint && result.outpoint){
+                    scope.addArrayAsImage(data,result.inpoint,result.outpoint,imageWidth,imageHeight,returnedContainer)
+                }
+            })
+
         }
 
     }
 
-    my.addArrayAsImage = function(pixelArray, w, h, y, container) {
+    my.copyPixelsExpensively = function(dataIn,inIndex,outIndex,dataOut){
+        for(var i = inIndex;i<outIndex;i++){
+            dataOut[i-inIndex] = dataIn[i];
+        }
+    }
 
-        //console.log('creating with ',w,h,y);
+    my.addArrayAsImage = function(data, inY, outY, w, h, container) {
         var canvas = document.createElement('canvas');
         canvas.width = w;
-        canvas.height = h;
+        canvas.height = outY - inY;
         var ctx = canvas.getContext('2d');
-        // first, create a new ImageData to contain our pixels
-        var imgData = ctx.createImageData(w, h); // width x height
-        var data = imgData.data;
-
-        // copy img byte-per-byte into our ImageData
-        for (var i = 0, len = w * h * 4; i < len; i++) {
-            data[i] = pixelArray[i];
-        }
-        //console.log("created image with data",data)
-
-        // now we can draw our imagedata onto the canvas
+        var imgData = ctx.createImageData(w, h); 
+        if(imgData.data.set && data.slice){
+            var pixelArray = data.slice(inY*w*4,outY*w*4);
+            imgData.data.set(new Uint8ClampedArray(pixelArray));
+        } else {
+            my.copyPixelsExpensively(data,inY*w*4,outY*w*4,imgData.data);
+        }   
         ctx.putImageData(imgData, 0, 0);
-        container.appendChild(this.generateSprite(canvas.toDataURL()));
+        canvas.style.position = 'absolute';
+        canvas.style.width = this.dimensions.width + 'px';
+        canvas.style.height = Math.round(.5 * (outY - inY)) + 'px';
+        canvas.style.top = inY*.5 + 'px';
+        container.appendChild(canvas);
     }
-
-
     my.dimensions = {
         width: 0,
         height: 0

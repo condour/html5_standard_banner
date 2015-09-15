@@ -100,7 +100,7 @@ function createBanner(u, a) { // u is utils, a is assets
         u.hide(ctaRolledOver);
 
         addListeners();
-        u.subscribe("loaded",function(){container.style.display = 'block'});
+        u.subscribe("loaded",animate);
 
     }
 
