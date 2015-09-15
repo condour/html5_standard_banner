@@ -84,7 +84,7 @@ var createUtils = function() {
     my.decrementImageLoadCount = function() {
 
         this.imageLoadCount--;
-        
+
         if (this.imageLoadCount < 1) {
             this.publish('loaded');
         }
@@ -173,8 +173,8 @@ var createUtils = function() {
             var imageX = 0,
                 imageY = 0;
             context.drawImage(imageObj, 0, 0);
-            
-            
+
+
             var imageData = context.getImageData(imageX, imageY, imageWidth, imageHeight);
             var data = imageData.data;
             var inContent = false;
@@ -189,9 +189,9 @@ var createUtils = function() {
                 for (var x = 0; x < imageWidth; x++) {
                     var prevLines = imageWidth * y;
                     var currentPixel = ((prevLines) + x) * 4;
-                   /* for (var b = 0; b < 4; b++) {
-                        images[currentInd].push(data[currentPixel + b]);
-                    }*/
+                    /* for (var b = 0; b < 4; b++) {
+                         images[currentInd].push(data[currentPixel + b]);
+                     }*/
                     if (data[currentPixel + 3] > 0) {
                         blankLine = false;
                         break;
@@ -211,9 +211,9 @@ var createUtils = function() {
                 }
             }
 
-            sections.forEach(function(result){
-                if(result.inpoint && result.outpoint){
-                    scope.addArrayAsImage(data,result.inpoint,result.outpoint,imageWidth,imageHeight,returnedContainer)
+            sections.forEach(function(result) {
+                if (result.inpoint && result.outpoint) {
+                    scope.addArrayAsImage(data, result.inpoint, result.outpoint, imageWidth, imageHeight, returnedContainer)
                 }
             })
 
@@ -221,9 +221,9 @@ var createUtils = function() {
 
     }
 
-    my.copyPixelsExpensively = function(dataIn,inIndex,outIndex,dataOut){
-        for(var i = inIndex;i<outIndex;i++){
-            dataOut[i-inIndex] = dataIn[i];
+    my.copyPixelsExpensively = function(dataIn, inIndex, outIndex, dataOut) {
+        for (var i = inIndex; i < outIndex; i++) {
+            dataOut[i - inIndex] = dataIn[i];
         }
     }
 
@@ -232,18 +232,18 @@ var createUtils = function() {
         canvas.width = w;
         canvas.height = outY - inY;
         var ctx = canvas.getContext('2d');
-        var imgData = ctx.createImageData(w, h); 
-        if(imgData.data.set && data.slice){
-            var pixelArray = data.slice(inY*w*4,outY*w*4);
+        var imgData = ctx.createImageData(w, h);
+        if (imgData.data.set && data.slice) {
+            var pixelArray = data.slice(inY * w * 4, outY * w * 4);
             imgData.data.set(new Uint8ClampedArray(pixelArray));
         } else {
-            my.copyPixelsExpensively(data,inY*w*4,outY*w*4,imgData.data);
-        }   
+            my.copyPixelsExpensively(data, inY * w * 4, outY * w * 4, imgData.data);
+        }
         ctx.putImageData(imgData, 0, 0);
         canvas.style.position = 'absolute';
         canvas.style.width = this.dimensions.width + 'px';
         canvas.style.height = Math.round(.5 * (outY - inY)) + 'px';
-        canvas.style.top = inY*.5 + 'px';
+        canvas.style.top = inY * .5 + 'px';
         container.appendChild(canvas);
     }
     my.dimensions = {
