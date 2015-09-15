@@ -29,9 +29,14 @@ function createBanner(u, a) { // u is utils, a is assets
     aboveClickTag = document.querySelectorAll('.above-click-tag')[0]; // items that don't respond to clicktag
     ctaContainer = document.querySelectorAll('.cta-container')[0]; // cta itself (with rollover)
     belowClickTag = document.querySelectorAll('.below-click-tag')[0]; // anything below cta, which just responds to clicktag
-
+    u.clone(belowClickTag.style,{
+        position:'absolute',
+        width: u.dimensions.width + 'px',
+        height: u.dimensions.height + 'px',
+        border: '1px solid #ccc'
+    });
     // render, below, is the private function that creates the banner.
-    // it also runs when the banner is replayed.
+    
 
 
    
