@@ -29,40 +29,41 @@ function createBanner(u, a) { // u is utils, a is assets
             width: u.dimensions.width,
             height: u.dimensions.height
         })
+
+
+        s.cta = u.generateContainer(); // create a sized container for the cta
+        
+        u.clone(s.cta.style, {
+            left: a.ctaRolledOver.bbox.x * a.ctaRolledOver.bbox.multiplier + 'px',
+            top: a.ctaRolledOver.bbox.y * a.ctaRolledOver.bbox.multiplier + 'px',
+            width: a.ctaRolledOver.bbox.width * a.ctaRolledOver.bbox.multiplier + 'px',
+            height: a.ctaRolledOver.bbox.height * a.ctaRolledOver.bbox.multiplier + 'px',
+        });
+        u.clone(a.ctaRolledOver.bbox,{x:0,y:0})
+        u.clone(a.ctaRolledOut.bbox,{x:0,y:0})
+
         for (var asset in a) {
             if (a.hasOwnProperty(asset)) {
-                var spriteName = asset.substr(0, asset.length - 3);
-                s[spriteName] = undefined;
+                var spriteName = asset;
+                if (a[asset].type == 'png') { // check all pngs for transparency
+                    s[spriteName] = u.generateSplitSprite(a[asset]);
+                } else {
+                    s[spriteName] = u.generateSprite(a[asset].uri);
+                }
             }
         }
-        s.image0 = u.generateSprite(a.image0jpg); // note that because this image is base64 in the file, we reference it by variable
-        s.image1 = u.generateSprite(a.image1jpg);
-        s.resolveImage = u.generateSprite(a.resolveImagepng);
-        s.copy0 = u.generateSplitSprite(a.copy0png);
-        s.copy1 = u.generateSplitSprite(a.copy1png);
-        s.resolveCopy0 = u.generateSplitSprite(a.resolveCopy0png);
-        s.resolveCopy1 = u.generateSplitSprite(a.resolveCopy1png);
-        s.replayButton = u.generateSizedSprite(a.replayButtonsvg, u.dimensions.width - 20, 5, 15, 15);
+        
+        s.cta.appendChild(s.ctaRolledOut);
+        s.cta.appendChild(s.ctaRolledOver);
+        
+
+        s.replayButton = u.generateSizedSprite(a.replayButton.uri, u.dimensions.width - 20, 5, 15, 15);
         // REPLAY SETUP
         u.clone(s.replayButton.style, {
             cursor: 'pointer',
         })
 
-        // CTA SETUP
-        s.ctaRolledOut = u.generateSizedSprite(a.ctaRolledOutpng, 0, 0, 116, 28);
-        s.ctaRolledOver = u.generateSizedSprite(a.ctaRolledOverpng, 0, 0, 116, 28);
-
-        s.cta = u.generateContainer(); // create a sized container for the cta
-        u.clone(s.cta.style, {
-            left: "15px",
-            top: "173px",
-            width: '116px',
-            height: '28px'
-        });
-        s.cta.appendChild(s.ctaRolledOut);
-        s.cta.appendChild(s.ctaRolledOver);
-
-
+        
         s.ctaRolledOver.style.transition = s.ctaRolledOver.style.WebkitTransition = "opacity .3s";
         s.ctaContainer.appendChild(s.cta);
 
@@ -75,15 +76,14 @@ function createBanner(u, a) { // u is utils, a is assets
             position: "absolute"
         });
 
-        u.appendChildrenTo(s.belowClickTag)(s.image0, s.copy0, s.image1, s.copy1, s.resolveImage, s.resolveCopy0, s.resolveCopy1);
+
+        u.appendChildrenTo(s.belowClickTag)(s.image0, s.copy0, s.image1, s.copy1, s.resolveImage_1x, s.resolveCopy0, s.resolveCopy1);
         u.appendChildrenTo(s.aboveClickTag)(s.replayButton);
         u.hide(s.ctaRolledOver);
-
         addListeners();
         u.subscribe("loaded", animate);
 
     }
-
 
     //The first function in our sequence of animations
 
@@ -134,7 +134,7 @@ function createBanner(u, a) { // u is utils, a is assets
                 ease: Expo.easeOut
             })
 
-        .from(s.resolveImage, tt, {
+        .from(s.resolveImage_1x, tt, {
                 x: u.dimensions.width,
                 ease: Expo.easeOut
             }, lastPlusSmall)

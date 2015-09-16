@@ -68,6 +68,10 @@ var createUtils = function() {
     }
     my.generateSizedSprite = function(imgURL, x, y, w, h) {
         var div = this.generateSizedContainer(w + 1, h + 1);
+        this.addSpriteToDiv(div,imgURL,x,y,w,h);
+        return div;
+    }
+    my.addSpriteToDiv = function (div,imgURL,x,y,w,h){
         div.style.backgroundRepeat = 'no-repeat';
         var urlString = "url(\"" + imgURL + "\")"
         var image = new Image();
@@ -75,12 +79,10 @@ var createUtils = function() {
         this.incrementImageLoadCount();
         image.src = imgURL;
         div.style.backgroundImage = urlString;
-        div.style.backgroundSize = w + 'px ' + h + 'px';
-        div.style.left = x + 'px'
-        div.style.top = y + 'px'
-        return div;
+        div.style.backgroundSize = my.pixify(w) + ' ' + my.pixify(h);
+        div.style.left = my.pixify(x);
+        div.style.top = my.pixify(y);
     }
-
     my.decrementImageLoadCount = function() {
 
         this.imageLoadCount--;
@@ -151,17 +153,17 @@ var createUtils = function() {
         }
     }
 
-    my.generateSplitSprite = function(imgURL) {
+    my.generateSplitSprite = function(img) {
         var imageObj = new Image();
         var returnedContainer = this.generateContainer();
-        imageObj.onload = this.splitImage(imageObj, returnedContainer).bind(this);
+        imageObj.onload = this.splitImage(imageObj, img.bbox, returnedContainer).bind(this);
         this.incrementImageLoadCount();
-        imageObj.src = imgURL;
+        imageObj.src = img.uri;
         return returnedContainer;
 
     }
 
-    my.splitImage = function(imageObj, returnedContainer) {
+    my.splitImage = function(imageObj, bbox, returnedContainer) {
         var scope = this;
         return function splitImageInClosure() {
             scope.decrementImageLoadCount();
@@ -180,7 +182,7 @@ var createUtils = function() {
             var inContent = false;
             var currentInd = 0;
             var sections = [];
-            sections[currentInd] = {};
+           // sections[currentInd] = {inpoint: 0};
             // iterate over all pixels based on x and y coordinates; find in and out points
             for (var y = 0; y < imageHeight; y++) {
                 // loop through each column
@@ -200,22 +202,30 @@ var createUtils = function() {
                 }
                 if (!blankLine && !inContent) {
                     inContent = true;
+                    sections[currentInd] = {};
                     sections[currentInd].inpoint = y;
 
                 } else if (blankLine && inContent) {
                     inContent = false;
-
                     sections[currentInd].outpoint = y;
+
                     currentInd++;
-                    sections[currentInd] = {};
                 }
             }
+          //  sections[currentInd].outpoint = 0;
+          
+            if(sections.length === 1) {
+                scope.addSpriteToDiv(returnedContainer,imageObj.src,bbox.x*bbox.multiplier,bbox.y*bbox.multiplier,bbox.width*bbox.multiplier,bbox.height*bbox.multiplier);
+                
+                //returnedContainer.appendChild(newsprite);
 
-            sections.forEach(function(result) {
-                if (result.inpoint && result.outpoint) {
-                    scope.addArrayAsImage(data, result.inpoint, result.outpoint, imageWidth, imageHeight, returnedContainer)
-                }
-            })
+            } else {
+                sections.forEach(function(result) {
+                    if (result.inpoint !== undefined && result.outpoint !== undefined) {
+                        scope.addArrayAsImage(data, result.inpoint, result.outpoint, imageWidth, imageHeight, bbox, returnedContainer)
+                    }
+                })
+            }
 
         }
 
@@ -227,7 +237,7 @@ var createUtils = function() {
         }
     }
 
-    my.addArrayAsImage = function(data, inY, outY, w, h, container) {
+    my.addArrayAsImage = function(data, inY, outY, w, h, bbox, container) {
         var canvas = document.createElement('canvas');
         canvas.width = w;
         canvas.height = outY - inY;
@@ -241,10 +251,14 @@ var createUtils = function() {
         }
         ctx.putImageData(imgData, 0, 0);
         canvas.style.position = 'absolute';
-        canvas.style.width = this.dimensions.width + 'px';
-        canvas.style.height = Math.round(.5 * (outY - inY)) + 'px';
-        canvas.style.top = inY * .5 + 'px';
+        canvas.style.width = my.pixify(w*bbox.multiplier);
+        canvas.style.height = my.pixify(bbox.multiplier * (outY - inY));
+        canvas.style.top = my.pixify((bbox.y*bbox.multiplier) + (inY * bbox.multiplier));
+        canvas.style.left = my.pixify(bbox.x * bbox.multiplier);
         container.appendChild(canvas);
+    }
+    my.pixify = function(n){
+        return Math.round(n) + 'px'
     }
     my.dimensions = {
         width: 0,
