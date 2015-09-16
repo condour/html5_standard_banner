@@ -77,7 +77,7 @@ function createBanner(u, a) { // u is utils, a is assets
         });
 
 
-        u.appendChildrenTo(s.belowClickTag)(s.image0, s.copy0, s.image1, s.copy1, s.resolveImage_1x, s.resolveCopy0, s.resolveCopy1);
+        u.appendChildrenTo(s.belowClickTag)(s.image0, s.copy0, s.image1, s.copy1, s.resolveImage, s.resolveCopy0, s.resolveCopy1);
         u.appendChildrenTo(s.aboveClickTag)(s.replayButton);
         u.hide(s.ctaRolledOver);
         addListeners();
@@ -125,16 +125,16 @@ function createBanner(u, a) { // u is utils, a is assets
 
         .add("doResolve", "+=2")
 
-        .to(s.copy1, tt, {
+        .staggerTo(s.copy1.childNodes, tt, {
                 x: u.dimensions.width,
                 ease: Expo.easeIn
-            }, "doResolve")
+            }, .1, "doResolve")
             .to(s.image1, tt, {
                 opacity: 0,
                 ease: Expo.easeOut
             })
 
-        .from(s.resolveImage_1x, tt, {
+        .from(s.resolveImage, tt, {
                 x: u.dimensions.width,
                 ease: Expo.easeOut
             }, lastPlusSmall)

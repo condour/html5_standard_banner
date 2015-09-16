@@ -92,7 +92,12 @@ function gulp64() {
             var parsed = path.parse(file.history[0]);
             var cleanExt = parsed.ext.substr(1).toLowerCase();
             file.bbox = file.bbox || {};
-            file.bbox.multiplier = parsed.name.indexOf('1x') == -1 ? .5 : 1;
+            if(parsed.name.indexOf('_1x') !== -1){
+            	file.bbox.multiplier = 1;
+            	parsed.name = parsed.name.replace('_1x','');
+        	} else {
+        		file.bbox.multiplier = .5;
+        	} 
             var isSvg = cleanExt === 'svg';
             var encoding = isSvg ? 'utf8' : 'base64';
             var stringifiedFile = isSvg ? encodeURIComponent(file.contents.toString(encoding)) : file.contents.toString(encoding);

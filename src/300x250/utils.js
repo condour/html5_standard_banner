@@ -126,8 +126,8 @@ var createUtils = function() {
     }
     my.generateSizedContainer = function(w, h) {
         var div = document.createElement("div");
-        div.style.width = w + "px";
-        div.style.height = h + "px";
+        div.style.width = my.pixify(w);
+        div.style.height = my.pixify(h);
         div.style.position = "absolute";
         div.style.overflow = "hidden";
         return div;
