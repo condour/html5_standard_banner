@@ -2,41 +2,22 @@
 
 ## Starting point for standard (IAB, Atlas, DCM) banners using Greensock as tween engine.
 
-This template is designed to solve some recurring problems with banner development. While some of the decisions may seem counterintuitive, there's a reason for each. Here's a list of the problems we wanted to solve, and the solutions we've come up with.
+This template is designed to solve some recurring problems with banner development. Here's a few features:
 
-#### Problem: Repetition between markup, css, and javascript. 
+1. Eliminates nearly all pixel positioning of assets by using png transparency.
+2. Eliminates duplicative addressing of assets, dom elements and classes.
+3. Automatically optimizes, trims, and URI encodes images.
+4. Allows for nearly no changes to basic timeline animations from size to size.
+5. Allows for 1x and 2x assets for retina / non-retina screens.
 
-When developing in a more conventional style, we noticed that assets were being named and called three times. Once, specified in the markup with a class, once in the css with a style describing position, and then in the javascript whenever a move was made.
+Here's the basics on how to use:
 
-#### Solution: Javascript instantiates and appends most elements.
+1. Make sure you have gulp and npm installed. Run npm install to make sure you have all dependencies. 
+2. Duplicate any assets that aren't full bleed into pngs the size of the banner stage. Don't bother cutting line-by-line for stacks of copy.
+3. For most assets, double the size for retina. If the asset is problematic for retina (some thin text, or a low-res original) leave 1x.
+4. Name each file according to how you want to address it in your javascript. For any 1x assets, append '_1x' to the name.
+5. All assets should be placed in the assets/<size> folder.
+6. Run gulp. src/<size>/assets.js file will be updated with URI encoded contents of assets folder.
+7. Instantiate assets using several utility functions designed to quickly generate sprites.
+8. Animate using TimelineLite.
 
-Rather than querying the dom for each page element, we just declare a variable for the element, create it, and append it to the container.
-
-#### Problem: Individual sizes and positions for every element.
-
-We found that in creating things conventionally, we were painstakingly declaring the width, height, left, and top of every graphical element. This meant quite a workload per resize as well.
-
-#### Solution: Most elements sized to banner size.
-
-There's extremely little overhead to a large area of transparency in a png, so we just size most elements as a png at the size of the stage (or 2x where retina is feasible).
-
-#### Problem: Creative has Retina Macbooks
-
-#### Solution: Where feasible, use 2x graphics.
-
-#### Problem: files must be handed to 3rd parties, sometimes non-technical, and occasionally edited
-
-#### Solution: Make sure output is human-readable
-
-We're going to consider a fuller build process in the future, but the philosophy will remain that any developer can take the output and work directly with it, as many parties may be involved with the banners at different stages in the process (localization, external QA, traffickers). At the moment, instead of a full build process, we have an asset prep gulp task, but the deliverables remain in the same spot, so it's strictly optional. Minification is overrated anyway, if you're already using gzip compression (which everyone is) https://css-tricks.com/the-difference-between-minification-and-gzipping/
-
-#### Problem: Strict file number and type limits among traffickers
-
-#### Solution: Base64 encode assets
-Spritesheeting can be labor intensive or complex if changes have to be made, so we'll use base64 encoding for images beyond the allowable number. This is also a solution for disallowed file types.
-
-#### Problem: Base 64 encoding, and pngquanting, and svg minifying, is tedious.
-
-#### Solution: There's a gulp task for that.
-
-Automatically takes any assets in assets/<size> folders, URI encodes, minifies as necessary, dumping the results into assets.js.
