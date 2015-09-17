@@ -25,9 +25,66 @@ var createUtils = function() {
     'use strict';
 
     var my = {};
-
     my.imageLoadCount = 0;
 
+    my.retina = (window.retina || window.devicePixelRatio > 1);
+
+    my.eliminateRedundantAssetsBasedOnDPI = function(allAssets) {
+        var returnedAssets;
+        if (my.retina) {
+            returnedAssets = my.pruneDuplicatesIn(my.filterOnLabel(allAssets, '_1x', true), my.filterOnLabel(allAssets, '_1x', false));
+        } else {
+            returnedAssets = my.pruneDuplicatesIn(my.filterOnLabel(allAssets, '_1x', false), my.filterOnLabel(allAssets, '_1x', true));
+        }
+        return returnedAssets;
+    }
+    my.filterOnLabel = function(assets, str, useFilteredItems) {
+        var returnedObject = {};
+        for (var a in assets) {
+            if (assets.hasOwnProperty(a)) {
+                if (useFilteredItems && a.indexOf(str) !== -1) {
+                    returnedObject[a.replace(str, '')] = assets[a];
+                } else if (!useFilteredItems && a.indexOf(str) === -1) {
+                    returnedObject[a] = assets[a];
+                }
+            }
+        }
+        return returnedObject;
+    }
+    
+    my.uniqLabels = function(a,b){
+        return my.uniq(my.getAllLabels(a),my.getAllLabels(b));
+    }
+    my.uniq = function(a,b){
+        var ab = a.concat(b);
+        var o = {}, i, l = ab.length, r = [];
+        for(i=0; i<l;i+=1) o[ab[i]] = ab[i];
+        for(i in o) r.push(o[i]);
+        return r;
+    }
+    my.getAllLabels = function(obj){
+        var returnedArray = [];
+        for (var i in obj){
+            if(obj.hasOwnProperty(i)){
+                returnedArray.push(i);
+            }
+        }
+        return returnedArray;
+    }
+    my.pruneDuplicatesIn = function(objectToPrune, objectToLeave) {
+        // if something exists in objectToLeave, use it first.
+        // then copy anything left from objectToPrune
+        var returnedAssets = {};
+        my.uniqLabels(objectToPrune,objectToLeave).forEach(function(result){
+            if(objectToLeave.hasOwnProperty(result)){
+                returnedAssets[result] = objectToLeave[result];
+            } else {
+                returnedAssets[result] = objectToPrune[result];
+            }
+        });
+        
+        return returnedAssets;
+    }
     my.removeAllChildren = function(el) {
             while (el.firstChild) {
                 el.removeChild(el.firstChild);
@@ -37,8 +94,6 @@ var createUtils = function() {
     my.returnTimer = function(initialTime) {
         var stopWatch = ((new Date().getTime()) - initialTime) * .001;
     }
-
-
     my.createListFunction = function(callback) {
         return function() {
             for (var i = 0; i < arguments.length; i++) {
@@ -48,7 +103,6 @@ var createUtils = function() {
             }
         }
     }
-
     my.kill = my.createListFunction(function(result, i) {
         if (result.parentNode) {
             result.parentNode.removeChild(result);
@@ -63,15 +117,19 @@ var createUtils = function() {
 
     my.appendChildrenTo = function(parentNode) {
         return this.createListFunction(function(result, i) {
+            if(result){
             parentNode.appendChild(result);
+            } else {
+                throw new Error(result + ' not an object');
+            }
         });
     }
     my.generateSizedSprite = function(imgURL, x, y, w, h) {
         var div = this.generateSizedContainer(w + 1, h + 1);
-        this.addSpriteToDiv(div,imgURL,x,y,w,h);
+        this.addSpriteToDiv(div, imgURL, x, y, w, h);
         return div;
     }
-    my.addSpriteToDiv = function (div,imgURL,x,y,w,h){
+    my.addSpriteToDiv = function(div, imgURL, x, y, w, h) {
         div.style.backgroundRepeat = 'no-repeat';
         var urlString = "url(\"" + imgURL + "\")"
         var image = new Image();
@@ -117,8 +175,14 @@ var createUtils = function() {
         return this;
     }
 
-    my.generateSprite = function(imgURL) {
-        return this.generateSizedSprite(imgURL, 0, 0, this.dimensions.width, this.dimensions.height);
+    my.generateSprite = function(img) {
+        img.bbox = img.bbox || {};
+        img.bbox.multipler = img.bbox.multiplier || 1;
+        img.bbox.x = img.bbox.x || 0;
+        img.bbox.y = img.bbox.y || 0;
+        img.bbox.width = img.bbox.width === undefined ? my.dimensions.width/img.bbox.multiplier : img.bbox.width;
+        img.bbox.height = img.bbox.height === undefined ? my.dimensions.height/img.bbox.multiplier : img.bbox.height;
+        return this.generateSizedSprite(img.uri, img.bbox.x*img.bbox.multiplier, img.bbox.y*img.bbox.multiplier, img.bbox.width*img.bbox.multiplier, img.bbox.height * img.bbox.multiplier);
     }
 
     my.generateContainer = function() {
@@ -154,6 +218,11 @@ var createUtils = function() {
     }
 
     my.generateSplitSprite = function(img) {
+        if(typeof(img)!== 'object'){
+           
+            throw new Error("Used URI instead of object in generateSplitSprite");
+
+        }
         var imageObj = new Image();
         var returnedContainer = this.generateContainer();
         imageObj.onload = this.splitImage(imageObj, img.bbox, returnedContainer).bind(this);
@@ -182,7 +251,7 @@ var createUtils = function() {
             var inContent = false;
             var currentInd = 0;
             var sections = [];
-           // sections[currentInd] = {inpoint: 0};
+            // sections[currentInd] = {inpoint: 0};
             // iterate over all pixels based on x and y coordinates; find in and out points
             for (var y = 0; y < imageHeight; y++) {
                 // loop through each column
@@ -212,11 +281,11 @@ var createUtils = function() {
                     currentInd++;
                 }
             }
-          //  sections[currentInd].outpoint = 0;
-          
-            if(sections.length === 1) {
-                scope.addSpriteToDiv(returnedContainer,imageObj.src,bbox.x*bbox.multiplier,bbox.y*bbox.multiplier,bbox.width*bbox.multiplier,bbox.height*bbox.multiplier);
-                
+            //  sections[currentInd].outpoint = 0;
+
+            if (sections.length === 1) {
+                scope.addSpriteToDiv(returnedContainer, imageObj.src, bbox.x * bbox.multiplier, bbox.y * bbox.multiplier, bbox.width * bbox.multiplier, bbox.height * bbox.multiplier);
+
                 //returnedContainer.appendChild(newsprite);
 
             } else {
@@ -251,13 +320,13 @@ var createUtils = function() {
         }
         ctx.putImageData(imgData, 0, 0);
         canvas.style.position = 'absolute';
-        canvas.style.width = my.pixify(w*bbox.multiplier);
+        canvas.style.width = my.pixify(w * bbox.multiplier);
         canvas.style.height = my.pixify(bbox.multiplier * (outY - inY));
-        canvas.style.top = my.pixify((bbox.y*bbox.multiplier) + (inY * bbox.multiplier));
+        canvas.style.top = my.pixify((bbox.y * bbox.multiplier) + (inY * bbox.multiplier));
         canvas.style.left = my.pixify(bbox.x * bbox.multiplier);
         container.appendChild(canvas);
     }
-    my.pixify = function(n){
+    my.pixify = function(n) {
         return Math.round(n) + 'px'
     }
     my.dimensions = {

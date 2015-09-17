@@ -94,7 +94,7 @@ function gulp64() {
             file.bbox = file.bbox || {};
             if(parsed.name.indexOf('_1x') !== -1){
             	file.bbox.multiplier = 1;
-            	parsed.name = parsed.name.replace('_1x','');
+            	//parsed.name = parsed.name.replace('_1x','');
         	} else {
         		file.bbox.multiplier = .5;
         	} 
@@ -152,13 +152,14 @@ function gulpTrimPng() {
                 	
                     x: lowestX,
                     y: lowestY,
-                    width: Math.min((highestX - lowestX) + 2,data.width),
-                    height: Math.min((highestY - lowestY) + 2,data.height)
+                    width: Math.min((highestX - lowestX) + 2,data.width-lowestX),
+                    height: Math.min((highestY - lowestY) + 2,data.height-lowestY)
                 };
                 destPng = new PNG({
                     width: bbox.width,
                     height: bbox.height
                 });
+                console.log(bbox)
                 png.bitblt(destPng, bbox.x, bbox.y, bbox.width, bbox.height, 0, 0);
                 var readable = destPng.pack();
                 var buffer = new Buffer([]);

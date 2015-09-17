@@ -11,7 +11,7 @@ function createBanner(u, a) { // u is utils, a is assets
     function render() {
         // extract dimension sizes from metatag in markup
         u.dimensions = u.extractSize(document.querySelectorAll("[name='ad.size']")[0].getAttributeNode("content").value);
-
+        a = u.eliminateRedundantAssetsBasedOnDPI(a);
         // retrieve main layers from markup
         s.container = document.querySelectorAll('.container')[0];
         s.aboveClickTag = document.querySelectorAll('.above-click-tag')[0]; // items that don't respond to clicktag
@@ -48,7 +48,7 @@ function createBanner(u, a) { // u is utils, a is assets
                 if (a[asset].type == 'png') { // check all pngs for transparency
                     s[spriteName] = u.generateSplitSprite(a[asset]);
                 } else {
-                    s[spriteName] = u.generateSprite(a[asset].uri);
+                    s[spriteName] = u.generateSprite(a[asset]);
                 }
             }
         }
