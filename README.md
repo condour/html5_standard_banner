@@ -1,6 +1,6 @@
 # HTML5 Standard Banner
 
-## Starting point for standard (IAB, Atlas, DCM) banners using Greensock as tween engine.
+## Starting point for standard (IAB, Atlas, DCM) banners using Greensock as tween engine, Gulp to process assets.
 
 This template is designed to solve some recurring problems with banner development. Here's a few features:
 
@@ -21,3 +21,23 @@ Here's the basics on how to use:
 7. Instantiate assets using several utility functions designed to quickly generate sprites.
 8. Animate using TimelineLite.
 
+File Structure:
+
+	+ assets
+		- <size>
+		|	<all image files to be processed by gulp>
+
+	+ src
+		- <size>
+		|	index.html (should only contain:
+		|				 basic markup describing containers, 
+		|				 an onload function, 
+		|				 the clicktag implementation,
+		|				 metatag declaring banner size)
+		|	main.js (your code here)
+		|	utils.js (functions for generating sprites, helpers, &c.)
+		|	assets.js (gulp generated file with an object for each encoded asset) 
+
+	gulpfile.js (asset processing)
+	package.json (npm dependencies)
+	.gitignore (for anything you'd like to ignore, possibly including assets.js)

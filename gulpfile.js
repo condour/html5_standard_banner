@@ -94,7 +94,6 @@ function gulp64() {
             file.bbox = file.bbox || {};
             if(parsed.name.indexOf('_1x') !== -1){
             	file.bbox.multiplier = 1;
-            	//parsed.name = parsed.name.replace('_1x','');
         	} else {
         		file.bbox.multiplier = .5;
         	} 
@@ -181,8 +180,6 @@ function gulpTrimPng() {
         if (file.isStream()) {
             this.emit('error', new PluginError(PLUGIN_NAME, 'Streams are not supported!'));
         }
-        //this.push(file);
-        //cb();
 
     });
 }

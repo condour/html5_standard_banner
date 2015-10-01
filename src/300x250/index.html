@@ -11,25 +11,37 @@
 		margin:0px; padding:0px;
 	}
 	* { Box-sizing: Border-box }
+
+    .container, .below-click-tag {
+        position:absolute;
+        overflow:hidden;
+    }
+    .container {
+        display: none;
+    }
+
 	</style>
+
+    <!-- GREENSOCK -->
     <script async src="https://cdnjs.cloudflare.com/ajax/libs/gsap/latest/plugins/CSSPlugin.min.js"></script>
     <script async src="https://cdnjs.cloudflare.com/ajax/libs/gsap/latest/easing/EasePack.min.js"></script>
     <script async src="https://cdnjs.cloudflare.com/ajax/libs/gsap/latest/TweenLite.min.js"></script>
     <script async src="https://cdnjs.cloudflare.com/ajax/libs/gsap/1.18.0/TimelineLite.min.js"></script>
 
-
+    <!-- OUR SCRIPTS -->
     <script async type="text/javascript" src="main.js"></script>
     <script async type="text/javascript" src="utils.js"></script>
     <script async type="text/javascript" src="assets.js"></script>
+    
     <!-- DCM CLICKTAG -->
     <script>
-    var clickTag = "http://www.google.com"
+        var clickTag = "http://www.google.com"
     </script>
 
 </head>
 
 <body>
-    <div class="container" style='display:none'>
+    <div class="container">
         <a href="javascript:window.open(window.clickTag)">
             <div class="below-click-tag">
                 <!-- most elements within the banner go here. -->
@@ -45,11 +57,19 @@
         </div>
     </div>
 </body>
+
 <script type="text/javascript">
-window.onload = function() {
-    var utils = createUtils(), assets = createAssets(), banner = createBanner(utils,assets);
-    banner.start();
-}
+
+    window.onload = function() {
+        var utils = createUtils(), assets = createAssets(), banner = createBanner(utils,assets);
+        if(utils.inPreview()){
+            window.parent.bannerControls.registerBanner(banner);
+        }
+
+        banner.start();
+
+    }
+
 </script>
 
 </html>

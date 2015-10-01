@@ -1,13 +1,61 @@
+// Avoid `console` errors in browsers that lack a console.
+(function() {
+    var method;
+    var noop = function() {};
+    var methods = [
+        'assert', 'clear', 'count', 'debug', 'dir', 'dirxml', 'error',
+        'exception', 'group', 'groupCollapsed', 'groupEnd', 'info', 'log',
+        'markTimeline', 'profile', 'profileEnd', 'table', 'time', 'timeEnd',
+        'timeStamp', 'trace', 'warn'
+    ];
+    var length = methods.length;
+    var console = (window.console = window.console || {});
+
+    while (length--) {
+        method = methods[length];
+        if (!console[method]) {
+            console[method] = noop;
+        }
+    }
+}());
 // Utils object (by convention, referred to as u within banner);
 
 var createUtils = function() {
     'use strict';
 
     var my = {};
+
+
+    function curry(fx) {
+      var arity = fx.length;
+
+      return function f1() {
+        var args = Array.prototype.slice.call(arguments, 0);
+        if (args.length >= arity) {
+          return fx.apply(null, args);
+        }
+        else {
+          return function f2() {
+            var args2 = Array.prototype.slice.call(arguments, 0);
+            return f1.apply(null, args.concat(args2)); 
+          }
+        }
+      };
+    }
+
     my.imageLoadCount = 0;
 
     my.retina = (window.retina || window.devicePixelRatio > 1);
-
+    my.inPreview = function(){
+        
+        return (getParameterByName('inPreview') === 'true');
+    }   
+    function getParameterByName(name) {
+    name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+    var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+        results = regex.exec(location.search);
+    return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+    }
     my.eliminateRedundantAssetsBasedOnDPI = function(allAssets) {
         var returnedAssets;
         if (my.retina) {
@@ -30,21 +78,23 @@ var createUtils = function() {
         }
         return returnedObject;
     }
-    
-    my.uniqLabels = function(a,b){
-        return my.uniq(my.getAllLabels(a),my.getAllLabels(b));
+
+    my.uniqLabels = function(a, b) {
+        return my.uniq(my.getAllLabels(a), my.getAllLabels(b));
     }
-    my.uniq = function(a,b){
+    my.uniq = function(a, b) {
         var ab = a.concat(b);
-        var o = {}, i, l = ab.length, r = [];
-        for(i=0; i<l;i+=1) o[ab[i]] = ab[i];
-        for(i in o) r.push(o[i]);
+        var o = {},
+            i, l = ab.length,
+            r = [];
+        for (i = 0; i < l; i += 1) o[ab[i]] = ab[i];
+        for (i in o) r.push(o[i]);
         return r;
     }
-    my.getAllLabels = function(obj){
+    my.getAllLabels = function(obj) {
         var returnedArray = [];
-        for (var i in obj){
-            if(obj.hasOwnProperty(i)){
+        for (var i in obj) {
+            if (obj.hasOwnProperty(i)) {
                 returnedArray.push(i);
             }
         }
@@ -54,14 +104,14 @@ var createUtils = function() {
         // if something exists in objectToLeave, use it first.
         // then copy anything left from objectToPrune
         var returnedAssets = {};
-        my.uniqLabels(objectToPrune,objectToLeave).forEach(function(result){
-            if(objectToLeave.hasOwnProperty(result)){
+        my.uniqLabels(objectToPrune, objectToLeave).forEach(function(result) {
+            if (objectToLeave.hasOwnProperty(result)) {
                 returnedAssets[result] = objectToLeave[result];
             } else {
                 returnedAssets[result] = objectToPrune[result];
             }
         });
-        
+
         return returnedAssets;
     }
     my.removeAllChildren = function(el) {
@@ -96,18 +146,19 @@ var createUtils = function() {
 
     my.appendChildrenTo = function(parentNode) {
         return this.createListFunction(function(result, i) {
-            if(result){
-            parentNode.appendChild(result);
+            if (result) {
+                parentNode.appendChild(result);
             } else {
                 throw new Error(result + ' not an object');
             }
         });
     }
-    my.generateSizedSprite = function(imgURL, x, y, w, h) {
-        var div = this.generateSizedContainer(w + 1, h + 1);
+    my.makeSizedSprite = function(imgURL, x, y, w, h) {
+        var div = this.makeSizedContainer(w + 1, h + 1);
         this.addSpriteToDiv(div, imgURL, x, y, w, h);
         return div;
     }
+
     my.addSpriteToDiv = function(div, imgURL, x, y, w, h) {
         div.style.backgroundRepeat = 'no-repeat';
         var urlString = "url(\"" + imgURL + "\")"
@@ -153,21 +204,37 @@ var createUtils = function() {
 
         return this;
     }
+    my.containerize = function(listOfSprites, bbox) {
 
-    my.generateSprite = function(img) {
+        var container = this.makeSizedContainer(bbox.width * bbox.multiplier, bbox.height * bbox.multiplier);
+
+        container.style.left = my.pixify(bbox.x * bbox.multiplier);
+        container.style.top = my.pixify(bbox.y * bbox.multiplier);
+
+        listOfSprites.forEach(function(result) {
+            my.clone(result.style, {
+                left: 0,
+                top: 0
+            });
+            container.appendChild(result);
+        })
+
+        return container;
+    }
+    my.makeSprite = curry(function(dimensions,img ) {
         img.bbox = img.bbox || {};
         img.bbox.multipler = img.bbox.multiplier || 1;
         img.bbox.x = img.bbox.x || 0;
         img.bbox.y = img.bbox.y || 0;
-        img.bbox.width = img.bbox.width === undefined ? my.dimensions.width/img.bbox.multiplier : img.bbox.width;
-        img.bbox.height = img.bbox.height === undefined ? my.dimensions.height/img.bbox.multiplier : img.bbox.height;
-        return this.generateSizedSprite(img.uri, img.bbox.x*img.bbox.multiplier, img.bbox.y*img.bbox.multiplier, img.bbox.width*img.bbox.multiplier, img.bbox.height * img.bbox.multiplier);
-    }
+        img.bbox.width = img.bbox.width === undefined ? dimensions.width / img.bbox.multiplier : img.bbox.width;
+        img.bbox.height = img.bbox.height === undefined ? dimensions.height / img.bbox.multiplier : img.bbox.height;
+        return my.makeSizedSprite(img.uri, img.bbox.x * img.bbox.multiplier, img.bbox.y * img.bbox.multiplier, img.bbox.width * img.bbox.multiplier, img.bbox.height * img.bbox.multiplier);
+    })
 
-    my.generateContainer = function() {
-        return this.generateSizedContainer(this.dimensions.width, this.dimensions.height);
-    }
-    my.generateSizedContainer = function(w, h) {
+    my.makeContainer = curry(function(dimensions) {
+        return my.makeSizedContainer(dimensions.width, dimensions.height);
+    })
+    my.makeSizedContainer = function(w, h) {
         var div = document.createElement("div");
         div.style.width = my.pixify(w);
         div.style.height = my.pixify(h);
@@ -181,7 +248,7 @@ var createUtils = function() {
             try {
                 target[i] = obj[i];
             } catch (e) {
-                console.log("couldn't clone property");
+                throw new Error("Couldn't clone property",i)
             }
 
         }
@@ -196,20 +263,20 @@ var createUtils = function() {
         }
     }
 
-    my.generateSplitSprite = function(img) {
-        if(typeof(img)!== 'object'){
-           
-            throw new Error("Used URI instead of object in generateSplitSprite");
+    my.makeSplitSprite = curry(function(dimensions,img) {
+        if (typeof(img) !== 'object') {
+
+            throw new Error("Used URI instead of object in makeSplitSprite");
 
         }
         var imageObj = new Image();
-        var returnedContainer = this.generateContainer();
-        imageObj.onload = this.splitImage(imageObj, img.bbox, returnedContainer).bind(this);
-        this.incrementImageLoadCount();
+        var returnedContainer = my.makeContainer(dimensions);
+        imageObj.onload = my.splitImage(imageObj, img.bbox, returnedContainer).bind(this);
+        my.incrementImageLoadCount();
         imageObj.src = img.uri;
         return returnedContainer;
 
-    }
+    })
 
     my.splitImage = function(imageObj, bbox, returnedContainer) {
         var scope = this;
@@ -308,29 +375,6 @@ var createUtils = function() {
     my.pixify = function(n) {
         return Math.round(n) + 'px'
     }
-    my.dimensions = {
-        width: 0,
-        height: 0
-    }
+
     return my;
 }
-// Avoid `console` errors in browsers that lack a console.
-(function() {
-    var method;
-    var noop = function() {};
-    var methods = [
-        'assert', 'clear', 'count', 'debug', 'dir', 'dirxml', 'error',
-        'exception', 'group', 'groupCollapsed', 'groupEnd', 'info', 'log',
-        'markTimeline', 'profile', 'profileEnd', 'table', 'time', 'timeEnd',
-        'timeStamp', 'trace', 'warn'
-    ];
-    var length = methods.length;
-    var console = (window.console = window.console || {});
-
-    while (length--) {
-        method = methods[length];
-        if (!console[method]) {
-            console[method] = noop;
-        }
-    }
-}());
