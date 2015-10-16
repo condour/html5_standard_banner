@@ -26,7 +26,11 @@
     "through2": "^2.0.0",
     "vinyl": "^0.5.3"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "gulp-changed": "^1.3.0",
+    "gulp-newer": "^0.5.1",
+    "gulp-replace": "^0.5.4"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
