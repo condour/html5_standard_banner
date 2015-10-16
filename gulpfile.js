@@ -86,7 +86,7 @@ gulp.task('changed', function() {
     sourceFolders = getFolders(assetsPath);
 
     sourceFolders.map(function(folder) {
-        var imgCache = path.join(sourcePath,folder,'/cache');
+        var imgCache = path.join(sourcePath,folder,'/.cache');
 
         //only push new files through streamqueue to build new js file
         var stream = streamqueue({
@@ -104,13 +104,13 @@ gulp.task('changed', function() {
                     speed: 4
                 })())
                 .pipe(gulp64())
-                .pipe(gulp.dest(path.join(sourcePath, folder + "/cache")))
+                .pipe(gulp.dest(path.join(sourcePath, folder + "/.cache")))
                 .pipe(concat('assetList')),
 
                 gulp.src(path.join(assetsPath, folder, '/*.{gif,jpg}'))
                 .pipe(newer(imgCache))
                 .pipe(gulp64())
-                .pipe(gulp.dest(path.join(sourcePath, folder + "/cache")))
+                .pipe(gulp.dest(path.join(sourcePath, folder + "/.cache")))
                 .pipe(concat('assetList')),
 
                 gulp.src(path.join(assetsPath, folder, '/*.svg'))
@@ -124,12 +124,12 @@ gulp.task('changed', function() {
                 })
             )
             .pipe(concat('assets_cache.js'))
-            .pipe(gulp.dest(path.join(sourcePath, folder + "/cache")))
+            .pipe(gulp.dest(path.join(sourcePath, folder + "/.cache")))
 
             //at the end of the stream run pushNew to write cache to assets.js file
             stream.on('end',function(){
-               pushNew(path.join(sourcePath,folder + '/cache/assets_cache.js'),path.join(sourcePath,folder + '/assets.js'));
-            }); 
+               pushNew(path.join(sourcePath,folder + '/.cache/assets_cache.js'),path.join(sourcePath,folder + '/assets.js'));
+            });
     });
    
 });
@@ -162,16 +162,16 @@ function pushNew(cacheDir,assetsDir){
                     //if a match is found
                     //the current array position in your assets.js file becomes equal to the current array position in the cached file
                     oldFileSplit[i] = cacheFileSplit[j];
+                    console.log('writing files..')
                     //log the match positions
                     //console.log('have a match at ' + i + " " + j)
                }
             }
-        }   
+        }
     }
     writeFiles();
     //write the changed files
     function writeFiles(){
-      console.log('writing files..')
       //write the oldFile array with its new places from the cache joined by a new line to your assets.js file
       fs.writeFileSync(assetsDir,oldFileSplit.join("\n"))
     }
