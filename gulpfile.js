@@ -21,6 +21,8 @@ var PNG = require('pngjs').PNG;
 
 var newer = require('gulp-newer');
 var replace = require('gulp-replace');
+var argv = require('yargs').argv;
+var gulpif = require('gulp-if');
 
 // iterate through each folder within assets
 var fileTypes = {
@@ -47,6 +49,13 @@ function tryBase64() {
 
 gulp.task('default', function() {
 
+    if (argv.b64){
+        console.log("base64 encoding all images..")
+    }
+    if (argv.img){
+        console.log("pushing images as links (no base64 encoding)")
+    }
+
     sourceFolders = getFolders(assetsPath);
 
     sourceFolders.map(function(folder) {
@@ -62,14 +71,20 @@ gulp.task('default', function() {
                     quality: '65-80',
                     speed: 4
                 })())
-                .pipe(gulp64())
+                .pipe(gulpif(argv.img,gulp.dest(path.join(sourcePath, folder))))
+                .pipe(gulpif(argv.img,gulpImg()))
+                .pipe(gulpif(argv.b64,gulp64()))
                 .pipe(concat('assetList')),
                 gulp.src(path.join(assetsPath, folder, '/*.{gif,jpg}'))
-                .pipe(gulp64())
+                .pipe(gulpif(argv.img,gulp.dest(path.join(sourcePath, folder))))
+                .pipe(gulpif(argv.img,gulpImg()))
+                .pipe(gulpif(argv.b64,gulp64()))
                 .pipe(concat('assetList')),
                 gulp.src(path.join(assetsPath, folder, '/*.svg'))
                 .pipe(svgmin())
-                .pipe(gulp64())
+                .pipe(gulpif(argv.img,gulp.dest(path.join(sourcePath, folder))))
+                .pipe(gulpif(argv.img,gulpImg()))
+                .pipe(gulpif(argv.b64,gulp64()))
                 .pipe(concat('assetList')),
                 gfile('footer', '}}', {
                     src: true
@@ -103,20 +118,26 @@ gulp.task('changed', function() {
                     quality: '65-80',
                     speed: 4
                 })())
-                .pipe(gulp64())
+                .pipe(gulpif(argv.img,gulp.dest(path.join(sourcePath, folder))))
+                .pipe(gulpif(argv.img,gulpImg()))
+                .pipe(gulpif(argv.b64,gulp64()))
                 .pipe(gulp.dest(path.join(sourcePath, folder + "/.cache")))
                 .pipe(concat('assetList')),
 
                 gulp.src(path.join(assetsPath, folder, '/*.{gif,jpg}'))
                 .pipe(newer(imgCache))
-                .pipe(gulp64())
+                .pipe(gulpif(argv.img,gulp.dest(path.join(sourcePath, folder))))
+                .pipe(gulpif(argv.img,gulpImg()))
+                .pipe(gulpif(argv.b64,gulp64()))
                 .pipe(gulp.dest(path.join(sourcePath, folder + "/.cache")))
                 .pipe(concat('assetList')),
 
                 gulp.src(path.join(assetsPath, folder, '/*.svg'))
                 .pipe(newer(imgCache))
                 .pipe(svgmin())
-                .pipe(gulp64())
+                .pipe(gulpif(argv.img,gulp.dest(path.join(sourcePath, folder))))
+                .pipe(gulpif(argv.img,gulpImg()))
+                .pipe(gulpif(argv.b64,gulp64()))
                 .pipe(gulp.dest(imgCache))
                 .pipe(concat('assetList')),
                 gfile('footer', '}}', {
@@ -129,7 +150,7 @@ gulp.task('changed', function() {
             //at the end of the stream run pushNew to write cache to assets.js file
             stream.on('end',function(){
                pushNew(path.join(sourcePath,folder + '/.cache/assets_cache.js'),path.join(sourcePath,folder + '/assets.js'));
-            });
+            }); 
     });
    
 });
@@ -162,12 +183,11 @@ function pushNew(cacheDir,assetsDir){
                     //if a match is found
                     //the current array position in your assets.js file becomes equal to the current array position in the cached file
                     oldFileSplit[i] = cacheFileSplit[j];
-                    console.log('writing files..')
                     //log the match positions
                     //console.log('have a match at ' + i + " " + j)
                }
             }
-        }
+        }   
     }
     writeFiles();
     //write the changed files
@@ -203,6 +223,46 @@ function gulp64() {
             var encodingString = encoding === 'utf8' ? 'charset=utf-8' : 'base64'
             var prefix = 'data:image/' + fileTypes[cleanExt] + ';' + encodingString + ',';
             var lineString = '\t' + parsed.name + ':{ bbox:' + JSON.stringify(file.bbox) + ', type: "' + cleanExt + '", uri:\'' + prefix + stringifiedFile + '\'},';
+            var lineBuffer = new Buffer(lineString, 'ascii');
+            file.contents = lineBuffer;
+
+        }
+        if (file.isStream()) {
+            this.emit('error', new PluginError(PLUGIN_NAME, 'Streams are not supported!'));
+        }
+        this.push(file);
+        cb();
+
+    });
+
+}
+
+function gulpImg() {
+
+    // var encoded = new Buffer(); // allocate ahead of time
+
+    // Creating a stream through which each file will pass
+    return through.obj(function(file, enc, cb) {
+        if (file.isNull()) {
+            // return empty file
+            return cb(null, file);
+        }
+        if (file.isBuffer()) {
+
+            var parsed = path.parse(file.history[0]);
+            var cleanExt = parsed.ext.substr(1).toLowerCase();
+            file.bbox = file.bbox || {};
+            if(parsed.name.indexOf('_1x') !== -1){
+                file.bbox.multiplier = 1;
+            } else {
+                file.bbox.multiplier = .5;
+            } 
+            var isSvg = cleanExt === 'svg';
+            var encoding = isSvg ? 'utf8' : 'base64';
+            //var stringifiedFile = isSvg ? encodeURIComponent(file.contents.toString(encoding)) : file.contents.toString(encoding);
+            var encodingString = encoding === 'utf8' ? 'charset=utf-8' : 'base64'
+            var prefix = 'data:image/' + fileTypes[cleanExt] + ';' + encodingString + ',';
+            var lineString = '\t' + parsed.name + ':{ bbox:' + JSON.stringify(file.bbox) + ', type: "' + cleanExt + '", uri:\'' + './' + parsed.name + parsed.ext + '\'},';
             var lineBuffer = new Buffer(lineString, 'ascii');
             file.contents = lineBuffer;
 
