@@ -51,6 +51,8 @@ function createBanner(utils, assets) { // u is utils, a is assets
         var makeSprite = utils.makeSprite(dimensions);
         var makeContainer = utils.makeContainer(dimensions);
         var makeSplitSprite = utils.makeSplitSprite(dimensions);
+        console.log(makeContainer);
+
         // pass assets through filter to remove those we don't need, based on whether we're retina or not.
         assets = utils.eliminateRedundantAssetsBasedOnDPI(assets);
         
@@ -84,7 +86,7 @@ function createBanner(utils, assets) { // u is utils, a is assets
         sprites.resolveCopy1  =  makeSprite(assets.resolveCopy1);
         sprites.ctaRolledOut  =  makeSprite(assets.ctaRolledOut);
         sprites.ctaRolledOver =  makeSprite(assets.ctaRolledOver);
-
+        sprites.testContainer = utils.makeContainer(dimensions);
         sprites.cta = utils.containerize([sprites.ctaRolledOut,sprites.ctaRolledOver],assets.ctaRolledOut.bbox);
         sprites.ctaContainer.appendChild(sprites.cta);
 

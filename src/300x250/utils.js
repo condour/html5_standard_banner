@@ -27,11 +27,14 @@ var createUtils = function() {
 
 
     function curry(fx) {
+
       var arity = fx.length;
+      console.log("currying arity",fx.length,arguments)
 
       return function f1() {
         var args = Array.prototype.slice.call(arguments, 0);
         if (args.length >= arity) {
+            console.log("in f1",args.length,arity)
           return fx.apply(null, args);
         }
         else {
