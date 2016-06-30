@@ -1,0 +1,15 @@
+body { margin:0px 0px; padding:0px; } 
+
+* { box-sizing: Border-box } 
+
+#container{
+	background-color:white;
+	position:absolute;
+	overflow:hidden;
+	border: 1px solid black;
+} 
+
+.sprite {
+	position:absolute;
+	background-repeat:no-repeat;
+}
