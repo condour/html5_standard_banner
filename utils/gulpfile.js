@@ -3,6 +3,8 @@ This gulpfile is not required to create banners, but serves as a utility.
 It iterates through the assets folders for each size, and creates an 
 assets.css file in the each src folders with the proper ID selectors, 
 size, positioning, and background image for each asset.
+
+Authors: Nick Russo, Nathan Wray, Michael Condouris
 */
 
 // Include gulp (http://gulpjs.com/)
@@ -336,85 +338,7 @@ function pushNew(assetsDir,srcDir){
     });
 
     delCache(assetsDir,srcDir);
-/*
-    var fileStream = streamqueue({objectMode:true},
-        fs.createReadStream(assetsDir+ '/.cache/css/main_cache.css',{encoding:'utf8'}),
-        fs.createReadStream(srcDir + '/css/main.css',{encoding:'utf8'})
-    ).on('data',(files) =>{
-        BuildFile(files);
-    }).on('end',(err) => {
-        if (err){
-            console.log(err);
-        } else {
-            //this does get run by the watch task
-            Compare(combinedFile).then((updatedFile) => {
-                //in here does not
-                fs.writeFileSync(srcDir + '/css/main.css',updatedFile);
-            })
-        }
-        //run del cache on every end
-        delCache(assetsDir,srcDir);
-    })
 
-*/
-    
-    // //set cache and assets dir to point to css files
-    // assetsDir = assetsDir + '/.cache/css/main_cache.css';
-    // srcDir = srcDir + '/css/main.css';
-
-    // //read source and cached assets.css files
-    // cacheFile =  fs.readFileSync(assetsDir,'utf8');
-    // currFile = fs.readFileSync(srcDir,'utf8');
-    
-    // //regex to split the files to arrays
-    // var re = /}/;
-    // //create an array to store new and existing selectors in
-    // var newSelectors = [], eSelectors = [];
-    // //split files into arrays based on the newline regex
-    // var cacheFileSplit = cacheFile.split(re);
-    // var currFileSplit = currFile.split(re);
-    
-    // //loop through assets.css file array
-    // for (i=0;i<currFileSplit.length;i++){
-    //     //regex to find id's
-    //     //var re = /[#.]\w+/
-    //     var re = /[#.][\w,-]+/;
-    //     //loop through cached assets.css file array
-    //     for (j=0;j<cacheFileSplit.length;j++){
-    //         //if the first word match for both positions in current iteration are not null (id's exist)
-    //         if ((re.exec(currFileSplit[i]) != null) && (re.exec(cacheFileSplit[j]) != null)){
-    //            //store the filenames for comparison
-    //            var currFileMatch = re.exec(currFileSplit[i])[0];
-    //            var cacheFileMatch = re.exec(cacheFileSplit[j])[0];
-               
-    //            //compare the id's
-    //            if (currFileMatch == cacheFileMatch) {
-    //                 //if a match is found
-    //                 //the current array position in your assets.css file becomes 
-    //                 //equal to the current array position in the cached file
-                    
-    //                 currFileSplit[i] = cacheFileSplit[j];
-    //                 eSelectors.push(cacheFileSplit[j] + '}');
-    //            }
-    //            if(currFileMatch != cacheFileMatch) {
-    //                 //if there is no match but the selector exists in the cache,
-    //                 //add the selector to the main.css file   
-    //                 newSelectors.push(cacheFileSplit[j] + '}');
-    //            }
-    //         }
-    //     }
-    // }
-    
-    // //filter out duplicates from newSelectors array
-    // newSelectors = uniq(newSelectors);
-    // //set newSelectors array to the difference between the
-    // //selectors array
-    // newSelectors = newSelectors.diff(eSelectors);
-    // writeFiles();
-    // //write the changed files
-    // function writeFiles(){
-    //   fs.writeFileSync(srcDir,currFileSplit.join('}') + newSelectors.join(''))
-    // }
 }
 
 function gulpImg() {
@@ -445,21 +369,45 @@ function gulpImg() {
             //if (parsed.ext )
             var lineString;
             if (parsed.ext === '.png'){
-                lineString = '#' + parsed.name + ' {\n' +
+                if (parsed.name.endsWith("_2x")){
+                    lineString = '#' + parsed.name + ' {\n' +
+                                '\tleft:' + Math.floor(file.bbox.x/2) + 'px;\n' +
+                                '\ttop:' + Math.floor(file.bbox.y/2) + 'px;\n' +
+                                '\twidth:' + Math.floor(file.bbox.width/2) + 'px;\n' +
+                                '\theight:' + Math.floor(file.bbox.height/2) + 'px;\n' +
+                                '\tbackground-image:url(../img/' + parsed.name + parsed.ext + ');\n' +
+                                '\tbackground-size:100%;\n' +
+                                '}\n';
+
+                }else{
+                    lineString = '#' + parsed.name + ' {\n' +
                                 '\tleft:' + file.bbox.x + 'px;\n' +
                                 '\ttop:' + file.bbox.y + 'px;\n' +
                                 '\twidth:' + file.bbox.width + 'px;\n' +
                                 '\theight:' + file.bbox.height + 'px;\n' +
                                 '\tbackground-image:url(../img/' + parsed.name + parsed.ext + ');\n' +
-                                '}\n';   
+                                '}\n';
+                }   
             } else {
-                lineString = '#' + parsed.name + ' {\n' +
+                 if (parsed.name.endsWith("_2x")){
+                    lineString = '#' + parsed.name + ' {\n' +
+                                '\tleft:' + 0 + 'px;\n' +
+                                '\ttop:' + 0 + 'px;\n' +
+                                '\twidth:' + Math.floor(imgdata.width/2) + 'px;\n' +
+                                '\theight:' + Math.floor(imgdata.height/2) + 'px;\n' + 
+                                '\tbackground-image:url(../img/' + parsed.name + parsed.ext + ');\n' +
+                                '\tbackground-size:100%;\n' +
+                                '}\n';
+
+                 }else{
+                    lineString = '#' + parsed.name + ' {\n' +
                                 '\tleft:' + 0 + 'px;\n' +
                                 '\ttop:' + 0 + 'px;\n' +
                                 '\twidth:' + imgdata.width + 'px;\n' +
                                 '\theight:' + imgdata.height + 'px;\n' + 
                                 '\tbackground-image:url(../img/' + parsed.name + parsed.ext + ');\n' +
                                 '}\n';
+                            }
             }
             var lineBuffer = new Buffer(lineString, 'ascii');
             file.contents = lineBuffer;
@@ -484,6 +432,12 @@ function gulpTrimPng() {
         if (file.isBuffer()) {
             var png = new PNG();
             png.parse(file.contents, function(err, data) {
+                if(err){
+                    // console.log(JSON.stringify(file));
+                    var stringified = JSON.stringify(file);
+                    var jsonobj = JSON.parse(stringified);
+                    console.log("ERROR OCCURRED AT IMAGE:".bgRed.white.bold + " " + jsonobj.history[0])
+                }
                 var stream = through();
                 var w = data.width;
                 var h = data.height;
